@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<title>Jay Client</title>
+<link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
+<script src="js/jquery.js"></script>
+<script src="js/bootstrap.js"></script>
+
+<script>
+$("document").ready(function() {
+	$(".buttonc").click( function() {
+		window.open("index.html?popout=true", "_blank", "width=400, height=300")
+
+
+	});
+
+})
+</script>
+</head>
+
+<body>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="page-header"><h1>Jay Client</h1></div>
+			<button class="buttonc">button</button>
+		</div>
+		</div>
+	<div class="row">
+		
+		<div class="col-md-8">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+				<div class="panel-title">Make a Transaction
+				</div>
+				</div>
+				<div class="panel-body">
+
+					<div role="tabpanel">
+
+					  <!-- Nav tabs -->
+					  <ul class="nav nav-tabs" role="tablist">
+					    <li role="presentation" class="active"><a href="#payment" aria-controls="payment" role="tab" data-toggle="tab">Payment</a></li>
+					    <li role="presentation"><a href="#leasing" aria-controls="leasing" role="tab" data-toggle="tab">Balance Leasing</a></li>
+					    <li role="presentation"><a href="#generate" aria-controls="generate" role="tab" data-toggle="tab">Generate Account</a></li>
+					    <li role="presentation"><a href="#bcst" aria-controls="bcst" role="tab" data-toggle="tab">Broadcast Bytes</a></li>
+
+					  </ul>
+					  <br/><br/>
+					  <!-- Tab panes -->
+					  <div class="tab-content">
+					    <div role="tabpanel" class="tab-pane active" id="payment">
+					    	<form class="tx">
+								<div class="form-group">
+									<label for="passphrase" class="control-label">Secret Phrase</label>
+									<div class="">
+										<input type="password" class="passphrase form-control"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="recipient" class="control-label">Recipient<br/></label>
+									<div class="">
+										<input type="text" class="recipient form-control"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="publickey" class="control-label">Public Key (optional)</label>
+									<div class="">
+										<input type="text" class="publickey form-control"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="amount" class="control-label">Amount</label>
+									<div class="">
+										<input type="text" class="amount form-control"/>
+									</div>
+								</div>
+
+								<button class="btn btn-success btn-large pull-right">Generate Transaction</button>
+							</form>
+
+					    </div>
+					    <div role="tabpanel" class="tab-pane" id="leasing">
+
+					    	<form class="txl">
+					<div class="form-group">
+						<label for="passphrasl" class="control-label">Secret Phrase</label>
+						<div class="">
+							<input type="password" class="passphrasel form-control"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="recipientl" class="control-label">Recipient</label>
+						<div class="">
+							<input type="text" class="recipientl form-control"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="lengthl" class="control-label">Lease Length (blocks)</label>
+						<div class="">
+							<input type="text" class="lengthl form-control"/>
+							<p class="help-block">Max lease length is currently 32767 blocks (34 days)</p>
+						</div>
+					</div>
+
+					<button class="btn btn-success btn-large pull-right">Generate Transaction</button>
+				</form>
+				
+
+					    </div>
+					    <div role="tabpanel" class="tab-pane" id="generate">
+					    		<form class="gen">
+
+					    	<div class="form-group">
+						<label for="passphraseg" class="control-label">Secret Phrase</label>
+						<div class="">
+							<input type="text" class="passphraseg form-control"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="account" class="control-label">Account</label>
+						<div class="">
+							<input type="text" readonly class="accountg form-control"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="pubkeyg" class="control-label">Public Key</label>
+						<div class="">
+							<input type="text" readonly class="pubkeyg form-control"/>
+						</div>
+					</div>
+
+					<button class="btn btn-success btn-large pull-right rnd">Create Random</button>
+					    </div>
+
+					<div role="tabpanel" class="tab-pane" id="bcst">
+					    		<form class="bcf">
+
+					    	<div class="form-group">
+						<label for="broad" class="control-label">Transaction Bytes</label>
+							<textarea rows="5" class="broad form-control"></textarea>
+						</div><br/>
+
+					<button class="btn btn-success btn-large pull-right bcb">Broadcast Bytes</button>
+					   </form>
+					    </div>
+					</div>
+				</div>
+
+
+<br/><br/><br/>
+				<div class="well">
+				<div class="form-group">
+						<label for="bytes" class="control-label">Transaction Bytes</label>
+						<div>
+							<textarea rows="5" readonly class="bytes form-control"></textarea>
+						</div>
+					</div>
+				<button disabled class="btn btn-primary btn-large broadcast">Broadcast Transaction</button>
+			</div>
+				
+
+				</div>
+		</div>
+		</div>
+
+		<div class="col-md-4">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+				<div class="panel-title">Information
+				</div>
+				</div>
+				<div class="panel-body">
+					<dl class="dl-horizontal">
+					<dt>Location</dt><dd class="location"></dd>
+					<dt>Network</dt><dd class="network"></dd>
+				</dl>
+				<div class="well">
+					<p>Save and run page offline with <kbd>Ctrl</kbd> <kbd>S</kbd> or turn off network to increase security of the page.<br/><br/>The <a href='http://jnxt.org:7876/test'>jnxt node</a> can also be used to broadcast transactions by pasting the transaction bytes into the <i>broadcastTransaction</i> tab.</p>
+
+					<div class="page-header">Transaction Bytes QR</div>
+					<div data-toggle="modal" data-target="#qrbig" class="img-thumbnail" id="qr">
+
+					</div>
+					<p class="help-block">Click on QR code to make larger</p>
+
+				</div>
+
+		</div>
+		</div>
+		
+	</div>
+
+
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="qrbig" tabindex="-1" role="dialog" aria-labelledby="qrbigLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="qrbigLabel">Transaction Bytes QR</h4>
+      </div>
+      <div class="modal-body">
+        <div class="img-thumbnail" id="qrbigr"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+</body>
+</html>
