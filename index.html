@@ -9,19 +9,46 @@
 <script src="js/bootstrap.js"></script>
 
 <script>
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}   
+
+
 $("document").ready(function() {
 	$(".buttonc").click( function() {
 		window.open("index.html?popout=true", "_blank", "width=400, height=300")
 
 
 	});
+	if(getUrlParameter("popout") == "true")
+	{
+		$("#basepage").hide();
+		$("#popout").show();
+	}
+	else
+	{
+		$("#basepage").show();
+		$("#popout").hide();
+	}
+});
 
-})
+
 </script>
 </head>
 
 <body>
-<div class="container">
+<div class="container" id="basepage">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="page-header"><h1>Jay Client</h1></div>
@@ -215,7 +242,112 @@ $("document").ready(function() {
   </div>
 </div>
 
+<div id="popout">
+	<ul class="nav nav-tabs" role="tablist">
+		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
+		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
+		<li role="presentation"><a href="#accounts" aria-controls="accounts" role="tab" data-toggle="tab">Accounts</a></li>
+		<li role="presentation"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">Info</a></li>
 
+	</ul>
+	<br/>
+	<!-- Tab panes -->
+	<div class="tab-content">
+		<div role="tabpanel" class="tab-pane active" id="transact">
+			<div class="container">
+				<form class="transact_form">
+					<div class="form-group">
+						<label for="transact_account" class="control-label">Account</label>
+						<select id="transact_account" class="form-control">
+							<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+							<option>NXT-MDUW-7EM6-GMAX-22222</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="transact_transaction" class="control-label">Transaction</label>
+						<input id="transact_transaction" type="text" class="form-control"/>
+						<span class="help-block">Allows TRF or unsigned transaction bytes</span>
+					</div>
+					<button id="transact_continue" class="btn btn-primary btn-block">Continue</button>
+				</form>
+			</div>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="token">
+			<div class="container">
+				<form class="token_form">
+					<div class="form-group">
+						<label for="token_account" class="control-label">Account</label>
+						<select id="token_account" class="form-control">
+							<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+							<option>NXT-MDUW-7EM6-GMAX-22222</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="token_data" class="control-label">Website or Data</label>
+						<input id="token_data" type="text" class="form-control"/>
+						<span class="help-block"></span>
+					</div><br/>
+					<button id="token_create" class="btn btn-primary btn-block">Create</button>
+				</form>
+			</div>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="accounts">
+			<div class="container">
+				<form class="accounts_form">
+					<div class="form-group">
+						<label for="accounts_account" class="control-label">Account</label>
+						<select id="accounts_account" class="form-control">
+							<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+							<option>NXT-MDUW-7EM6-GMAX-22222</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  							<div class="btn-group" role="group">
+    							<button id="accounts_info" type="button" class="btn btn-default">Account Info</button>
+  							</div>
+  							<div class="btn-group" role="group">
+    							<button id="accounts_pin" type="button" class="btn btn-default">Change PIN</button>
+  							</div>
+  							<div class="btn-group" role="group">
+    							<button id="accounts_delete" type="button" class="btn btn-default">Delete Account</button>
+  							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  							<div class="btn-group" role="group">
+    							<button id="accounts_backup" type="button" class="btn btn-default">Backup</button>
+  							</div>
+  							<div class="btn-group" role="group">
+    							<button id="accounts_import" type="button" class="btn btn-default">Import</button>
+  							</div>
+  							<div class="btn-group" role="group">
+    							<button id="accounts_recover" type="button" class="btn btn-default">Recover</button>
+  							</div>
+						</div>
+					</div>
+					<button id="accounts_new" class="btn btn-primary btn-block">New Account</button>
+				</form>
+			</div>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="info">
+			<div class="container">
+				<dl>
+  					<dt>Version</dt>
+  					<dd id="info_version">0.00</dd>
+
+  					<dt>Build Date</dt>
+  					<dd id="info_date">March 2015</dd>
+
+  					<dt>Created By</dt>
+  					<dd id="info_created">Jones</dd>
+
+				</dl>
+			</div>
+		</div>
+	</div>
+</div>
 
 
 </body>
