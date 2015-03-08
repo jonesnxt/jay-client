@@ -139,7 +139,7 @@ function rndstr(len)
 
 function generateSecretPhrase()
 {
-	return rndstr(50);
+	return rndstr(40);
 }
 
 function encryptSecretPhrase(phrase, key)
@@ -187,8 +187,69 @@ function popoutOpen()
 	if(!localStorage["accounts"] || localStorage["accounts"].length == 0)
 	{
 		// no accounts, take us to the accounts tab first..
-		document.write("AAAAAA")
-		$("#accounts").tab("show");
+		$("#popout_tabs a[href='#accounts']").tab("show");
+		addAccountOption("No Accounts Added");
+	}
+	else
+	{
+		loadAccounts();
 	}
 
 }	
+
+function addAccountOption(option)
+{
+	$("#transact_account").append("<option>"+option+"</option>");
+	$("#token_account").append("<option>"+option+"</option>");
+	$("#accounts_account").append("<option>"+option+"</option>");
+}
+
+function pinHandler(source, pin)
+{
+	if(source == "accounts_new")
+	{
+		accountsNewHandler(pin);
+	}
+
+}
+
+function accountsNewHandler(pin)
+{
+	$("#modal_accounts_new").modal("show");
+	var account = newAccount(pin);
+
+	$("#modal_accounts_new_address").text(account["accountRS"]);
+	$("#modal_accounts_new_recovery").val(account["secretPhrase"]);
+}
+
+$("document").ready(function() {
+
+	$("#modal_enter_pin").on("show.bs.modal", function(e) {
+		$("#modal_enter_pin_input").val("");
+		$(".modal_enter_pin_number").click(function() {
+			$("#modal_enter_pin_input").val($("#modal_enter_pin_input").val() + $(this).data("number"));
+		});
+		$("#modal_enter_pin_clear").click(function() {
+			$("#modal_enter_pin_input").val("");
+		})
+		$("#modal_enter_pin_back").click(function() {
+			$("#modal_enter_pin_input").val($("#modal_enter_pin_input").val().substring(0, $("#modal_enter_pin_input").val().length-1));
+		})
+
+		var source = $(e.relatedTarget).data("source");
+		if(source == "accounts_new")
+		{
+			$("#modal_enter_pin_title").text("Create New Pin");
+		}
+
+		$("#modal_enter_pin_cancel").click(function() {
+			$("#modal_enter_pin_input").val("");
+		});
+		$("#modal_enter_pin_accept").click(function() {
+			$(this).modal("hide");
+			pinHandler(source, $("#modal_enter_pin_input").val());
+		})
+
+	});
+
+})
