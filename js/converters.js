@@ -1,5 +1,3 @@
-
-<script>
 var converters = function() {
 	var charToNibble = {};
 	var nibbleToChar = [];
@@ -244,4 +242,3 @@ var converters = function() {
 		}
 	}
 }();
-</script>

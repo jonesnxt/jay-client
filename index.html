@@ -7,6 +7,13 @@
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
 <script src="js/jquery.js"></script>
 <script src="js/bootstrap.js"></script>
+<script src="js/jsbn.js"></script>
+<script src="js/converters.js"></script>
+<script src="js/curve25519.js"></script>
+<script src="js/jssha256.js"></script>
+<script src="js/nxtaddress.js"></script>
+<script src="js/aes.js"></script>
+<script src="js/jaycli.js"></script>
 
 <script>
 
@@ -27,7 +34,7 @@ function getUrlParameter(sParam)
 
 $("document").ready(function() {
 	$(".buttonc").click( function() {
-		window.open("index.html?popout=true", "_blank", "width=400, height=300")
+		window.open("index.html?popout=true", "_blank", "width=400, height=290")
 
 
 	});
@@ -35,6 +42,7 @@ $("document").ready(function() {
 	{
 		$("#basepage").hide();
 		$("#popout").show();
+		popoutOpen();
 	}
 	else
 	{
@@ -43,7 +51,7 @@ $("document").ready(function() {
 	}
 });
 
-
+storeAccount(newAccount("1234"));
 </script>
 </head>
 
@@ -52,176 +60,138 @@ $("document").ready(function() {
 	<div class="row">
 		<div class="col-md-12">
 			<div class="page-header"><h1>Jay Client</h1></div>
-			<button class="buttonc">button</button>
 		</div>
-		</div>
-	<div class="row">
-		
-		<div class="col-md-8">
+	</div>
+	<div class="well">
+		<button class="buttonc btn btn-primary btn-block">Open Popout</button>
+		<span class="help-block">Opens a smaller popout window to more easily use. (reccomended)</span>
+	</div>
+	<!--<div class="row">
+		<div class="col-md-6">
 			<div class="panel panel-primary">
 				<div class="panel-heading">
-				<div class="panel-title">Make a Transaction
-				</div>
+					<div class="panel-title">
+						Popout
+					</div>
 				</div>
 				<div class="panel-body">
-
-					<div role="tabpanel">
-
-					  <!-- Nav tabs -->
-					  <ul class="nav nav-tabs" role="tablist">
-					    <li role="presentation" class="active"><a href="#payment" aria-controls="payment" role="tab" data-toggle="tab">Payment</a></li>
-					    <li role="presentation"><a href="#leasing" aria-controls="leasing" role="tab" data-toggle="tab">Balance Leasing</a></li>
-					    <li role="presentation"><a href="#generate" aria-controls="generate" role="tab" data-toggle="tab">Generate Account</a></li>
-					    <li role="presentation"><a href="#bcst" aria-controls="bcst" role="tab" data-toggle="tab">Broadcast Bytes</a></li>
-
-					  </ul>
-					  <br/><br/>
-					  <!-- Tab panes -->
-					  <div class="tab-content">
-					    <div role="tabpanel" class="tab-pane active" id="payment">
-					    	<form class="tx">
-								<div class="form-group">
-									<label for="passphrase" class="control-label">Secret Phrase</label>
-									<div class="">
-										<input type="password" class="passphrase form-control"/>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="recipient" class="control-label">Recipient<br/></label>
-									<div class="">
-										<input type="text" class="recipient form-control"/>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="publickey" class="control-label">Public Key (optional)</label>
-									<div class="">
-										<input type="text" class="publickey form-control"/>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="amount" class="control-label">Amount</label>
-									<div class="">
-										<input type="text" class="amount form-control"/>
-									</div>
-								</div>
-
-								<button class="btn btn-success btn-large pull-right">Generate Transaction</button>
-							</form>
-
-					    </div>
-					    <div role="tabpanel" class="tab-pane" id="leasing">
-
-					    	<form class="txl">
-					<div class="form-group">
-						<label for="passphrasl" class="control-label">Secret Phrase</label>
-						<div class="">
-							<input type="password" class="passphrasel form-control"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="recipientl" class="control-label">Recipient</label>
-						<div class="">
-							<input type="text" class="recipientl form-control"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="lengthl" class="control-label">Lease Length (blocks)</label>
-						<div class="">
-							<input type="text" class="lengthl form-control"/>
-							<p class="help-block">Max lease length is currently 32767 blocks (34 days)</p>
-						</div>
-					</div>
-
-					<button class="btn btn-success btn-large pull-right">Generate Transaction</button>
-				</form>
-				
-
-					    </div>
-					    <div role="tabpanel" class="tab-pane" id="generate">
-					    		<form class="gen">
-
-					    	<div class="form-group">
-						<label for="passphraseg" class="control-label">Secret Phrase</label>
-						<div class="">
-							<input type="text" class="passphraseg form-control"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="account" class="control-label">Account</label>
-						<div class="">
-							<input type="text" readonly class="accountg form-control"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="pubkeyg" class="control-label">Public Key</label>
-						<div class="">
-							<input type="text" readonly class="pubkeyg form-control"/>
-						</div>
-					</div>
-
-					<button class="btn btn-success btn-large pull-right rnd">Create Random</button>
-					    </div>
-
-					<div role="tabpanel" class="tab-pane" id="bcst">
-					    		<form class="bcf">
-
-					    	<div class="form-group">
-						<label for="broad" class="control-label">Transaction Bytes</label>
-							<textarea rows="5" class="broad form-control"></textarea>
-						</div><br/>
-
-					<button class="btn btn-success btn-large pull-right bcb">Broadcast Bytes</button>
-					   </form>
-					    </div>
-					</div>
+					<button class="buttonc btn btn-primary btn-block">Open Popout</button>
+					<span class="help-block">Opens a smaller popout window to more easily use. (reccomended)</span>
 				</div>
-
-
-<br/><br/><br/>
-				<div class="well">
-				<div class="form-group">
-						<label for="bytes" class="control-label">Transaction Bytes</label>
-						<div>
-							<textarea rows="5" readonly class="bytes form-control"></textarea>
-						</div>
-					</div>
-				<button disabled class="btn btn-primary btn-large broadcast">Broadcast Transaction</button>
 			</div>
-				
-
-				</div>
-		</div>
-		</div>
-
-		<div class="col-md-4">
-			<div class="panel panel-primary">
-				<div class="panel-heading">
-				<div class="panel-title">Information
-				</div>
-				</div>
-				<div class="panel-body">
-					<dl class="dl-horizontal">
-					<dt>Location</dt><dd class="location"></dd>
-					<dt>Network</dt><dd class="network"></dd>
-				</dl>
-				<div class="well">
-					<p>Save and run page offline with <kbd>Ctrl</kbd> <kbd>S</kbd> or turn off network to increase security of the page.<br/><br/>The <a href='http://jnxt.org:7876/test'>jnxt node</a> can also be used to broadcast transactions by pasting the transaction bytes into the <i>broadcastTransaction</i> tab.</p>
-
-					<div class="page-header">Transaction Bytes QR</div>
-					<div data-toggle="modal" data-target="#qrbig" class="img-thumbnail" id="qr">
-
-					</div>
-					<p class="help-block">Click on QR code to make larger</p>
-
-				</div>
-
-		</div>
 		</div>
 		
+		<div class="col-md-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<div class="panel-title">
+						Transact
+					</div>
+				</div>
+				<div class="panel-body">
+					<br/>
+					<div class="tab-content">
+						<form class="transact_form">
+							<div class="form-group">
+								<label for="transact_account" class="control-label">Account</label>
+								<select id="transact_account" class="form-control">
+									<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+									<option>NXT-MDUW-7EM6-GMAX-22222</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="transact_transaction" class="control-label">Transaction</label>
+								<input id="transact_transaction" type="text" class="form-control"/>
+								<span class="help-block">Allows TRF or unsigned transaction bytes</span>
+							</div>
+							<button id="transact_continue" class="btn btn-primary btn-block">Continue</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
-
-</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<div class="panel-title">
+						Token
+					</div>
+				</div>
+				<div class="panel-body">
+					<br/>
+					<form class="token_form">
+						<div class="form-group">
+							<label for="token_account" class="control-label">Account</label>
+							<select id="token_account" class="form-control">
+								<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+								<option>NXT-MDUW-7EM6-GMAX-22222</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="token_data" class="control-label">Website or Data</label>
+							<input id="token_data" type="text" class="form-control"/>
+							<span class="help-block"></span>
+						</div>
+						<br/>
+						<button id="token_create" class="btn btn-primary btn-block">Create</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<div class="panel-title">
+						Accounts
+					</div>
+				</div>
+				<div class="panel-body">
+					<br/>
+					<div role="tabpanel" class="tab-pane" id="accounts">
+						<form class="accounts_form">
+							<div class="form-group">
+								<label for="accounts_account" class="control-label">Account</label>
+								<select id="accounts_account" class="form-control">
+									<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+									<option>NXT-MDUW-7EM6-GMAX-22222</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  									<div class="btn-group" role="group">
+    									<button id="accounts_info" type="button" class="btn btn-default">Account Info</button>
+  									</div>
+  									<div class="btn-group" role="group">
+    									<button id="accounts_pin" type="button" class="btn btn-default">Change PIN</button>
+  									</div>
+  									<div class="btn-group" role="group">
+    									<button id="accounts_delete" type="button" class="btn btn-default">Delete Account</button>
+  									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="btn-group btn-group-justified" role="group" aria-label="...">
+  									<div class="btn-group" role="group">
+    									<button id="accounts_backup" type="button" class="btn btn-default">Backup</button>
+  									</div>
+  									<div class="btn-group" role="group">
+    									<button id="accounts_import" type="button" class="btn btn-default">Import</button>
+  									</div>
+  									<div class="btn-group" role="group">
+    									<button id="accounts_recover" type="button" class="btn btn-default">Recover</button>
+  									</div>
+								</div>
+							</div>
+							<button id="accounts_new" class="btn btn-primary btn-block">New Account</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>-->
 </div>
 
 <!-- Modal -->
@@ -254,14 +224,23 @@ $("document").ready(function() {
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div role="tabpanel" class="tab-pane active" id="transact">
-			<div class="container">
-				<form class="transact_form">
+			<div class="container-fluid">
+				<form id="transact_form" class="form-inline">
 					<div class="form-group">
 						<label for="transact_account" class="control-label">Account</label>
-						<select id="transact_account" class="form-control">
-							<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
-							<option>NXT-MDUW-7EM6-GMAX-22222</option>
-						</select>
+						<div class="row">
+							<div class="col-xs-10" style="margin-right: 0; padding-right: 1px;">
+								<select id="transact_account" class="form-control">
+									<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+									<option>NXT-MDUW-7EM6-GMAX-22222</option>
+									<option>NXT-WWWW-WWWW-WWWW-WWWWW</option>
+									<option>NXT-IIII-IIII-IIII-IIIII</option>
+								</select>
+							</div>
+							<div class="col-xs-2" style="margin-left: 0; padding-left: 1px;">
+								<button id="transact_account_copy" class="btn btn-default">Copy</button>
+							</div>
+						</div>
 					</div>
 					<div class="form-group">
 						<label for="transact_transaction" class="control-label">Transaction</label>
@@ -273,14 +252,21 @@ $("document").ready(function() {
 			</div>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="token">
-			<div class="container">
+			<div class="container-fluid">
 				<form class="token_form">
 					<div class="form-group">
 						<label for="token_account" class="control-label">Account</label>
-						<select id="token_account" class="form-control">
-							<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
-							<option>NXT-MDUW-7EM6-GMAX-22222</option>
-						</select>
+						<div class="row">
+							<div class="col-xs-10" style="margin-right: 0; padding-right: 1px">
+								<select id="token_account" class="form-control">
+									<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+									<option>NXT-MDUW-7EM6-GMAX-22222</option>
+								</select>
+							</div>
+							<div class="col-xs-2" style="margin-left: 0; padding-left: 1px">
+								<button id="token_account_copy" class="btn btn-default">Copy</button>
+							</div>
+						</div>
 					</div>
 					<div class="form-group">
 						<label for="token_data" class="control-label">Website or Data</label>
@@ -296,10 +282,17 @@ $("document").ready(function() {
 				<form class="accounts_form">
 					<div class="form-group">
 						<label for="accounts_account" class="control-label">Account</label>
-						<select id="accounts_account" class="form-control">
-							<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
-							<option>NXT-MDUW-7EM6-GMAX-22222</option>
-						</select>
+						<div class="row">
+							<div class="col-xs-10" style="margin-right: 0; padding-right: 1px">
+								<select id="accounts_account" class="form-control">
+									<option>NXT-RJU8-JSNR-H9J4-2KWKY</option>
+									<option>NXT-MDUW-7EM6-GMAX-22222</option>
+								</select>
+							</div>
+							<div class="col-xs-2" style="margin-left: 0; padding-left: 1px">
+								<button id="accounts_account_copy" class="btn btn-default">Copy</button>
+							</div>
+						</div>
 					</div>
 					<div class="form-group">
 						<div class="btn-group btn-group-justified" role="group" aria-label="...">

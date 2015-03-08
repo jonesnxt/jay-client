@@ -126,7 +126,7 @@ function pad(length, val) {
 
 function rndstr(len)
 {
-	var letters = "abcdefghjklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+	var letters = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 	var ret = "";
 	var nums = window.crypto.getRandomValues(new Uint32Array(len));
 
@@ -137,250 +137,58 @@ function rndstr(len)
 	return ret;
 }
 
+function generateSecretPhrase()
+{
+	return rndstr(50);
+}
+
+function encryptSecretPhrase(phrase, key)
+{
+	return CryptoJS.AES.encrypt(phrase, key);
+}
+
+function decryptSecretPhrase(cipher, key)
+{
+	return CryptoJS.AES.decrypt(cipher, key);
+}
+
+function newAccount(key)
+{
+	var accountData = {};
+	accountData["secretPhrase"] = generateSecretPhrase();
+	accountData["publicKey"] = converters.byteArrayToHexString(getPublicKey(accountData["secretPhrase"]));
+	accountData["accountRS"] = getAccountIdFromPublicKey(accountData["publicKey"], true);
+	accountData["key"] = key;
+	accountData["cipher"] = encryptSecretPhrase(accountData["secretPhrase"], key).toString();
+	return accountData;
+}
+
+function storeAccount(account)
+{ 
+	var sto = [];
+	if(localStorage["accounts"])
+	{
+		sto = JSON.parse(localStorage["accounts"]);
+	}
+	var acc = {};
+	acc["accountRS"] = account["accountRS"];
+	acc["publicKey"] = account["publicKey"];
+	acc["cipher"] = account["cipher"];
+	sto.push(acc);
+
+	localStorage["accounts"] = JSON.stringify(sto);
+}
 
 var epochNum = 1385294400;
-var online = false;
-$(document).ready(function() {
-
-	if(String(window.location).indexOf("jnxt") === -1) {
-		$(".location").text("localhost");
-	}
-	else {
-	 	$(".location").text("jnxt server");
-	}
-
-
-	function connect() { $(".network").text("online"); online = true;}
-	function notconnect() { $(".network").text("offline"); online = false;}
-
-	$.ajax({
-		method: "get",
-		type: "json",
-		url: "http://jnxt.org/vapor/network.php",
-		success: connect,
-		error: notconnect,
-		timeout: 1000});
-
-
-		
-	$(".tx").submit(function(e) {
-		e.preventDefault();
-		// what to do... ok so lets generate the tx bytes
-		// then sign them, then include the tx bytes in the sig
-		// then give them the tx bytes and the link to send them to
-		var zeroArray = [0];
-
-
-		var txbytes = [];
-		var type = 0;
-		txbytes.push(type);
-		var version = 1;
-		var subtype = 0;
-		txbytes.push((version << 4));
-		var timestamp = Math.floor(Date.now() / 1000) - 1385294400;
-		txbytes = txbytes.concat(converters.int32ToBytes(timestamp));
-		txbytes.push(160);
-		txbytes.push(5); // deadline
-		txbytes = txbytes.concat(getPublicKey($(".passphrase").val()));
-
-		var rec = new NxtAddress();
-		rec.set($(".recipient").val());
-		var recipient = (new BigInteger(rec.account_id())).toByteArray().reverse();
-		txbytes = txbytes.concat(recipient);
-		var amount = ((new BigInteger(String(parseInt($(".amount").val()*100000000))))).toByteArray().reverse();
-		while(amount.length != 8) amount = amount.concat(zeroArray);
-		txbytes = txbytes.concat(amount);
-		var fee = (converters.int32ToBytes(100000000))
-		while(fee.length != 8) fee = fee.concat(zeroArray);
-
-		txbytes = txbytes.concat(fee);
-		txbytes = txbytes.concat(pad(32, 0)); // ref full hash
-		txbytes = converters.hexStringToByteArray(converters.byteArrayToHexString(txbytes));
-		var signable = txbytes;
-
-		txbytes = txbytes.concat(pad(64, 0)); // signature
-
-		if($(".publickey").val())
-		{
-			txbytes.push(4);
-			txbytes = txbytes.concat(pad(3, 0));
-			txbytes = txbytes.concat(pad(12, 0));
-			txbytes = txbytes.concat([1]);
-			txbytes = txbytes.concat(converters.hexStringToByteArray($(".publickey").val()));
-		} 
-		else  {
-			txbytes = txbytes.concat(pad(16, 0)); // ignore everything else
-
-		}
-
-		var sig = signBytes(txbytes, $(".passphrase").val());
-
-		signable = signable.concat(sig);
-		
-		if($(".publickey").val())
-		{
-			signable.push(4);
-			signable = signable.concat(pad(3, 0));
-			signable = signable.concat(pad(12, 0));
-			signable = signable.concat([1]);
-			signable = signable.concat(converters.hexStringToByteArray($(".publickey").val()));
-		} 
-		else  {
-			signable = signable.concat(pad(16, 0)); // ignore everything else
-
-		}
-
-		// now we have a full tx...
-
-		var fulltx = converters.byteArrayToHexString(signable);
-
-		$(".bytes").val(fulltx);
-				qr.makeCode(fulltx);
-				qrbig.makeCode(fulltx);
-
-		$(".broadcast").removeAttr("disabled");
-	});
-
-
-	$(".txl").submit(function(e) {
-		e.preventDefault();
-		// what to do... ok so lets generate the tx bytes
-		// then sign them, then include the tx bytes in the sig
-		// then give them the tx bytes and the link to send them to
-		var zeroArray = [0];
-
-
-		var txbytes = [];
-		var type = 4;
-		txbytes.push(type);
-		var version = 1;
-		var subtype = 0;
-		txbytes.push((version << 4));
-		var timestamp = Math.floor(Date.now() / 1000) - 1385294400;
-		txbytes = txbytes.concat(converters.int32ToBytes(timestamp));
-		txbytes.push(160);
-		txbytes.push(5); // deadline
-		txbytes = txbytes.concat(getPublicKey($(".passphrasel").val()));
-
-		var rec = new NxtAddress();
-		rec.set($(".recipientl").val());
-		var recipient = (new BigInteger(rec.account_id())).toByteArray().reverse();
-		txbytes = txbytes.concat(recipient);
-		var amount = (new BigInteger("0")).toByteArray().reverse();
-		while(amount.length != 8) amount = amount.concat(zeroArray);
-		txbytes = txbytes.concat(amount);
-		var fee = (converters.int32ToBytes(100000000))
-		while(fee.length != 8) fee = fee.concat(zeroArray);
-
-		txbytes = txbytes.concat(fee);
-		txbytes = txbytes.concat(pad(32, 0)); // ref full hash
-		txbytes = converters.hexStringToByteArray(converters.byteArrayToHexString(txbytes));
-		var signable = txbytes;
-
-		txbytes = txbytes.concat(pad(64, 0)); // signature
-
-		txbytes = txbytes.concat(pad(16, 0)); // ignore everything else
-		var amt = ((new BigInteger($(".lengthl").val()))).toByteArray().reverse();
-		if(amt.length == 1) amt = amt.concat(zeroArray);
-		txbytes.push(1);
-		txbytes = txbytes.concat(amt);
-
-
-		//var blks = 
-		var sig = signBytes(txbytes, $(".passphrasel").val());
-
-		signable = signable.concat(sig);
-		
-		signable = signable.concat(pad(16, 0)); // ignore everything else
-		var amt = ((new BigInteger($(".lengthl").val()))).toByteArray().reverse();
-		if(amt.length == 1) amt = amt.concat(zeroArray);
-		signable.push(1);
-		signable = signable.concat(amt);
-
-
-		// now we have a full tx...
-
-		var fulltx = converters.byteArrayToHexString(signable);
-
-		$(".bytes").val(fulltx);
-		qr.makeCode(fulltx);
-		qrbig.makeCode(fulltx);
-		$(".broadcast").removeAttr("disabled");
-	});
-
-	$(".gen").submit(function(e) {e.preventDefault()});
-
-	$(".passphraseg").bind('input propertychange', genacc)
-
-	function genacc() {
-		// generate account and public key, display them
-		var pass = $(".passphraseg").val();
-		var pub = converters.byteArrayToHexString(getPublicKey(pass));
-		var rs = getAccountIdFromPublicKey(pub, true)
-
-		$(".accountg").val(rs);
-		$(".pubkeyg").val(pub);
-
-	};
-
-
-	$(".rnd").click(function() {
-
-
-		$(".passphraseg").val(rndstr(50));
-		genacc();
-	})
-	
-
-	function broad(resp)
+var accounts;
+function popoutOpen()
+{
+	// ok lets deal with any popup setup thats needed.
+	if(!localStorage["accounts"] || localStorage["accounts"].length == 0)
 	{
-		$(".bytes").val(JSON.stringify(resp));
+		// no accounts, take us to the accounts tab first..
+		document.write("AAAAAA")
+		$("#accounts").tab("show");
 	}
 
-
-	$(".broadcast").click(function() {
-			var d = {requestType: "broadcastTransaction", transactionBytes: $(".bytes").val()};
-
-		
-		$.ajax("http://jnxt.org:7876/nxt", {
-			url: "http://jnxt.org:7876/nxt",
-			data: d,
-			type: "POST",
-			success: broad,
-			timeout: 2000,
-			fail: broad});
-
-	});
-
-
-	$(".bcb").click(function(e) {
-		e.preventDefault();
-			var d = {requestType: "broadcastTransaction", transactionBytes: $(".broad").val()};
-
-		
-		$.ajax("http://jnxt.org:7876/nxt", {
-			url: "http://jnxt.org:7876/nxt",
-			data: d,
-			type: "POST",
-			success: broad,
-			timeout: 2000,
-			fail: broad});
-
-	});
-
-	var qr = new QRCode("qr", {
-		  width: 256,
-    	height: 256,
-   		colorDark : "#000000",
-    	colorLight : "#ffffff",
-    	correctLevel : QRCode.CorrectLevel.L
-	});
-	var qrbig = new QRCode("qrbigr", {
-		  width: 512,
-    	height: 512,
-   		colorDark : "#000000",
-    	colorLight : "#ffffff",
-    	correctLevel : QRCode.CorrectLevel.L
-	});
-
-});
+}	
