@@ -139,19 +139,33 @@ function rndstr(len)
 
 function generateSecretPhrase()
 {
-	return rndstr(30);
+	return "JAY_" + rndstr(30);
 }
 
 function encryptSecretPhrase(phrase, key)
 {
-	return CryptoJS.AES.encrypt(phrase, key);
+	var rkey = prepKey(key);
+	return CryptoJS.AES.encrypt(phrase, rkey);
 }
 
 function decryptSecretPhrase(cipher, key)
 {
-	var data = CryptoJS.AES.decrypt(cipher, key);
-	if(data.sigBytes > 0) return data;
+	var rkey = prepKey(key);
+	var data = CryptoJS.AES.decrypt(cipher, rkey);
+	if(data.sigBytes > 0 && converters.hexStringToString(data.toString()).indexOf("JAY_") == 0)
+	 return converters.hexStringToString(data.toString());
 	else return false;
+}
+
+function prepKey(key)
+{
+	var rounds = 1000;
+	var digest = key;
+	for(var i=0;i<rounds;i++)
+	{
+		digest = converters.byteArrayToHexString(simpleHash(digest));
+	}
+	return digest;
 }
 
 function newAccount(key)
@@ -242,6 +256,10 @@ function pinHandler(source, pin)
 	{
 		changePinHandler(pin);
 	}
+	if(source == "newpin")
+	{
+		newPinHandler(pin);
+	}
 
 }
 
@@ -273,9 +291,32 @@ function changePinHandler(pin)
 	}
 	else
 	{
-		// correct
-
+		data = undefined;
+		$("#modal_enter_pin").data("source", "newpin");
+		$("#modal_enter_pin").data("pin", pin);
+		setTimeout(function() {$("#modal_enter_pin").modal("show");}, 600);
 	}
+}
+
+function newPinHandler(pin)
+{
+	var address = $("#accounts_account option:selected").text();
+	var accounts = JSON.parse(localStorage["accounts"]);
+	var oldpin = $("#modal_enter_pin").data("pin");
+
+	for(var a=0;a<accounts.length;a++)
+	{
+		if(accounts[a]["accountRS"] == address)
+		{
+			// now lets handle...
+			var sec = decryptSecretPhrase(accounts[a]["cipher"], oldpin).toString();
+			var newcipher = encryptSecretPhrase(sec, pin).toString();
+			accounts[a]["cipher"] = newcipher;
+		}
+	}
+	localStorage["accounts"] = JSON.stringify(accounts);
+	$("#modal_basic_info").modal("show");
+	$("#modal_basic_info_title").text("PIN Change Successful");
 }
 
 function findAccount(address)
@@ -297,13 +338,19 @@ $("document").ready(function() {
 		$("#modal_enter_pin_input").val("");
 
 		var source = $(e.relatedTarget).data("source");
+		if(source === undefined) source = $("#modal_enter_pin").data("source");
+
 		if(source == "accounts_new")
 		{
 			$("#modal_enter_pin_title").text("Create New PIN");
 		}
-		if(source == "change")
+		else if(source == "change")
 		{
-			$("modal_enter_pin_title").text("Enter Old PIN")
+			$("#modal_enter_pin_title").text("Enter Old PIN")
+		}
+		else if(source == "newpin")
+		{
+			$("#modal_enter_pin_title").text("Enter New PIN");
 		}
 		$("#modal_enter_pin_accept").data("source", source);
 	});
