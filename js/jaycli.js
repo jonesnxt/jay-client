@@ -149,7 +149,9 @@ function encryptSecretPhrase(phrase, key)
 
 function decryptSecretPhrase(cipher, key)
 {
-	return CryptoJS.AES.decrypt(cipher, key);
+	var data = CryptoJS.AES.decrypt(cipher, key);
+	if(data.sigBytes > 0) return data;
+	else return false;
 }
 
 function newAccount(key)
@@ -236,6 +238,10 @@ function pinHandler(source, pin)
 	{
 		accountsNewHandler(pin);
 	}
+	if(source == "change")
+	{
+		changePinHandler(pin);
+	}
 
 }
 
@@ -254,35 +260,71 @@ function accountsNewHandler(pin)
 	});
 }
 
+function changePinHandler(pin)
+{
+	var address = $("#accounts_account option:selected").text();
+	var account = findAccount(address);
+	var data = decryptSecretPhrase(account.cipher, pin);
+	if(data === false)
+	{
+		// incorrect
+		$("#modal_basic_info").modal("show");
+		$("#modal_basic_info_title").text("Incorrect PIN");
+	}
+	else
+	{
+		// correct
+
+	}
+}
+
+function findAccount(address)
+{
+	var accounts = JSON.parse(localStorage["accounts"]);
+	if(accounts && accounts.length > 0)
+	{
+		for(var a=0;a<accounts.length;a++)
+		{
+			if(accounts[a]["accountRS"] == address) return accounts[a];
+		}
+	}
+	return false;
+}
+
 $("document").ready(function() {
 
 	$("#modal_enter_pin").on("show.bs.modal", function(e) {
 		$("#modal_enter_pin_input").val("");
-		$(".modal_enter_pin_number").click(function() {
-			$("#modal_enter_pin_input").val($("#modal_enter_pin_input").val() + $(this).data("number"));
-		});
-		$("#modal_enter_pin_clear").click(function() {
-			$("#modal_enter_pin_input").val("");
-		})
-		$("#modal_enter_pin_back").click(function() {
-			$("#modal_enter_pin_input").val($("#modal_enter_pin_input").val().substring(0, $("#modal_enter_pin_input").val().length-1));
-		})
 
 		var source = $(e.relatedTarget).data("source");
 		if(source == "accounts_new")
 		{
-			$("#modal_enter_pin_title").text("Create New Pin");
+			$("#modal_enter_pin_title").text("Create New PIN");
 		}
-
-		$("#modal_enter_pin_cancel").click(function() {
-			$("#modal_enter_pin_input").val("");
-		});
-		$("#modal_enter_pin_accept").click(function() {
-			$(this).modal("hide");
-			pinHandler(source, $("#modal_enter_pin_input").val());
-		})
-
+		if(source == "change")
+		{
+			$("modal_enter_pin_title").text("Enter Old PIN")
+		}
+		$("#modal_enter_pin_accept").data("source", source);
 	});
+
+	$("#modal_enter_pin_cancel").click(function() {
+		$("#modal_enter_pin_input").val("");
+	});
+	$("#modal_enter_pin_accept").click(function() {
+		$(this).modal("hide");
+		pinHandler($("#modal_enter_pin_accept").data("source"), $("#modal_enter_pin_input").val());
+	})
+
+	$(".modal_enter_pin_number").click(function() {
+		$("#modal_enter_pin_input").val($("#modal_enter_pin_input").val() + $(this).data("number"));
+	});
+	$("#modal_enter_pin_clear").click(function() {
+		$("#modal_enter_pin_input").val("");
+	})
+	$("#modal_enter_pin_back").click(function() {
+		$("#modal_enter_pin_input").val($("#modal_enter_pin_input").val().substring(0, $("#modal_enter_pin_input").val().length-1));
+	})
 
 	$(".account_selector").change(function(e) {
 		var source = $(this).data("source");
@@ -295,19 +337,9 @@ $("document").ready(function() {
 	$("#modal_accounts_info").on("show.bs.modal", function(e) {
 		var source = $(e.relatedTarget).data("source");
 		var address = $("#"+source+"_account option:selected").text();
-		var accounts = JSON.parse(localStorage["accounts"]);
-		var account = undefined;
-		if(accounts && accounts.length)
-		{
-			for(var a=0;a<accounts.length;a++)
-			{
-				if(address == accounts[a]["accountRS"])
-				{
-					account = accounts[a];
-				}
-			}
-		}
-		if(account == undefined)
+		var account = findAccount(address);
+
+		if(account === false)
 		{
 			$("#modal_accounts_info_address").val("Account Not Found");
 		}

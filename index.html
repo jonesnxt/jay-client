@@ -274,7 +274,7 @@ $("document").ready(function() {
     							<button id="accounts_info" type="button" class="btn btn-default" data-toggle="modal" data-source="accounts" data-target="#modal_accounts_info">Account Info</button>
   							</div>
   							<div class="btn-group" role="group">
-    							<button id="accounts_pin" type="button" class="btn btn-default">Change PIN</button>
+    							<button id="accounts_pin" type="button" class="btn btn-default" data-toggle="modal" data-source="change" data-target="#modal_enter_pin">Change PIN</button>
   							</div>
   							<div class="btn-group" role="group">
     							<button id="accounts_delete" type="button" class="btn btn-default">Delete Account</button>
@@ -445,6 +445,19 @@ $("document").ready(function() {
   	</div>
 </div>
 
+<div class="modal fade" id="modal_basic_info" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+      		<div class="modal-header">
+       			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        		<h4 class="modal-title" id="modal_basic_info_title">Basic Info</h4>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" id="modal_basic_info_close" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+  	</div>
+</div>
 
 <div class="modal fade" id="qrbig" tabindex="-1" role="dialog" aria-labelledby="qrbigLabel" aria-hidden="true">
   <div class="modal-dialog">
