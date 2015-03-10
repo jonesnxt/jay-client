@@ -5,54 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9" />
 <title>Jay Client</title>
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.js"></script>
-<script src="js/jsbn.js"></script>
-<script src="js/converters.js"></script>
-<script src="js/curve25519.js"></script>
-<script src="js/jssha256.js"></script>
-<script src="js/nxtaddress.js"></script>
-<script src="js/aes.js"></script>
-<script src="js/jaycli.js"></script>
 
-<script>
-
-function getUrlParameter(sParam)
-{
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++) 
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam) 
-        {
-            return sParameterName[1];
-        }
-    }
-}   
-
-
-$("document").ready(function() {
-	$(".buttonc").click( function() {
-		window.open("index.html?popout=true", "_blank", "width=400, height=300")
-
-
-	});
-	if(getUrlParameter("popout") == "true")
-	{
-		$("#basepage").hide();
-		$("#popout").show();
-		popoutOpen();
-	}
-	else
-	{
-		$("#basepage").show();
-		$("#popout").hide();
-	}
-});
-
-//storeAccount(newAccount("1234"));
-</script>
 </head>
 
 <body>
@@ -75,7 +28,7 @@ $("document").ready(function() {
 					</div>
 				</div>
 				<div class="panel-body">
-					<button class="buttonc btn btn-primary btn-block">Open Popout</button>
+					<button class="buttonc btn btn-primary btn-blo">Open Popout</button>
 					<span class="help-block">Opens a smaller popout window to more easily use. (reccomended)</span>
 				</div>
 			</div>
@@ -277,7 +230,7 @@ $("document").ready(function() {
     							<button id="accounts_pin" type="button" class="btn btn-default" data-toggle="modal" data-source="change" data-target="#modal_enter_pin">Change PIN</button>
   							</div>
   							<div class="btn-group" role="group">
-    							<button id="accounts_delete" type="button" class="btn btn-default">Delete Account</button>
+    							<button id="accounts_delete" type="button" class="btn btn-default" data-toggle="modal" data-source="delete" data-target="#modal_enter_pin">Delete Account</button>
   							</div>
 						</div>
 					</div>
@@ -459,6 +412,61 @@ $("document").ready(function() {
   	</div>
 </div>
 
+<div class="modal fade" id="modal_export" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+      		<div class="modal-header">
+       			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        		<h4 class="modal-title" id="modal_export_title">Export Account</h4>
+      		</div>
+      		<div class="modal-body">
+      			<dl style="margin-bottom:0;padding-bottom:2px;">
+      				<dt>
+      					Address
+      				</dt>
+      				<dd id="modal_export_address">
+      				</dd>
+      			</dl>
+      			<div class="form-group" style="margin-bottom:0;padding-bottom:0;">
+      				<label for="modal_export_key" class="control-label">Export Key</label>
+					<input id="modal_export_key" type="text" class="form-control input-sm" readonly/>
+					<span class="help-text">Export key works as an Nxt secret phrase.</span>
+      			</div>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" id="modal_export_close" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+  	</div>
+</div>
+
+<div class="modal fade" id="modal_delete" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+      		<div class="modal-header">
+       			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        		<h4 class="modal-title" id="modal_delete_title">Delete Account</h4>
+      		</div>
+      		<div class="modal-body">
+      			<dl style="margin-bottom:0;padding-bottom:2px;">
+      				<dt>
+      					Address
+      				</dt>
+      				<dd id="modal_delete_address">
+      				</dd>
+      			</dl>
+      			<div class="well">
+      				<strong>Are you sure you want to delete?</strong>
+      			</div>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" id="modal_delete_dont" data-dismiss="modal">Don't Delete</button>
+        		<button type="button" class="btn btn-danger" id="modal_delete_delete">Delete</button>
+			</div>
+		</div>
+  	</div>
+</div>
+
 <div class="modal fade" id="qrbig" tabindex="-1" role="dialog" aria-labelledby="qrbigLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -476,6 +484,54 @@ $("document").ready(function() {
   </div>
 </div>
 
+
+<script src="js/jquery.js" type="text/javascript"></script>
+<script src="js/bootstrap.js" type="text/javascript"></script>
+<script src="js/jsbn.js" type="text/javascript"></script>
+<script src="js/converters.js" type="text/javascript"></script>
+<script src="js/curve25519.js" type="text/javascript"></script>
+<script src="js/jssha256.js" type="text/javascript"></script>
+<script src="js/nxtaddress.js" type="text/javascript"></script>
+<script src="js/aes.js" type="text/javascript"></script>
+<script src="js/jaycli.js" type="text/javascript"></script>
+<script>
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}   
+
+
+$("document").ready(function() {
+	$(".buttonc").click( function() {
+		window.open("index.html?popout=true", "_blank", "width=400, height=300")
+
+
+	});
+	if(getUrlParameter("popout") == "true")
+	{
+		$("#basepage").hide();
+		$("#popout").show();
+		popoutOpen();
+	}
+	else
+	{
+		$("#basepage").show();
+		$("#popout").hide();
+	}
+});
+
+//storeAccount(newAccount("1234"));
+</script>
 
 </body>
 </html>

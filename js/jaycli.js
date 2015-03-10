@@ -198,6 +198,8 @@ function storeAccount(account)
 var epochNum = 1385294400;
 var noAccountsMessage = "No Accounts Added";
 var accounts;
+var pendingAccount;
+
 function popoutOpen()
 {
 	// ok lets deal with any popup setup thats needed.
@@ -264,6 +266,10 @@ function pinHandler(source, pin)
 	{
 		exportHandler(pin);
 	}
+	if(source == "delete")
+	{
+		deleteHandler(pin);
+	}
 
 }
 
@@ -271,15 +277,9 @@ function accountsNewHandler(pin)
 {
 	$("#modal_accounts_new").modal("show");
 	var account = newAccount(pin);
-
+	pendingAccount = account;
 	$("#modal_accounts_new_address").text(account["accountRS"]);
 	$("#modal_accounts_new_recovery").val(account["secretPhrase"].substring(4));
-
-	$("#modal_accounts_new_add").click(function() {
-		storeAccount(account);
-		loadAccounts();
-		$("#modal_accounts_new").modal("hide");
-	});
 }
 
 function changePinHandler(pin)
@@ -325,11 +325,10 @@ function newPinHandler(pin)
 	$("#modal_basic_info_title").text("PIN Change Successful");
 }
 
-function accountsNewHandler(pin)
+function exportHandler(pin)
 {
-	$("#modal_export").modal("show");
 	var address = $("#accounts_account option:selected").text();
-	account = findAccount(pin);
+	account = findAccount(address);
 
 	var data = decryptSecretPhrase(account.cipher, pin);
 	if(data === false)
@@ -340,18 +339,33 @@ function accountsNewHandler(pin)
 	}
 	else
 	{
-		$("#modal_export_key").val(data);
+		$("#modal_export").modal("show");
+		$("#modal_export_address").text(account["accountRS"]);
+		$("#modal_export_key").val(data.substring(4));
+		data = undefined;
 	}
-
-	$("#modal_accounts_new_address").text(account["accountRS"]);
-	$("#modal_accounts_new_recovery").val(account["secretPhrase"].substring(4));
-
-	$("#modal_accounts_new_add").click(function() {
-		storeAccount(account);
-		loadAccounts();
-		$("#modal_accounts_new").modal("hide");
-	});
 }
+
+function deleteHandler(pin)
+{
+	var address = $("#accounts_account option:selected").text();
+	account = findAccount(address);
+
+	var data = decryptSecretPhrase(account.cipher, pin);
+	if(data === false)
+	{
+		// incorrect
+		$("#modal_basic_info").modal("show");
+		$("#modal_basic_info_title").text("Incorrect PIN");
+	}
+	else
+	{
+		$("#modal_delete").modal("show");
+		$("#modal_delete_address").text(account["accountRS"]);
+		data = undefined;
+	}
+}
+
 
 
 function findAccount(address)
@@ -381,7 +395,7 @@ $("document").ready(function() {
 		}
 		else if(source == "change")
 		{
-			$("#modal_enter_pin_title").text("Enter Old PIN")
+			$("#modal_enter_pin_title").text("Enter Old PIN");
 		}
 		else if(source == "newpin")
 		{
@@ -389,7 +403,11 @@ $("document").ready(function() {
 		}
 		else if(source =="export")
 		{
-			$("#modal_enter_pin_title").text("Enter PIN to Export")
+			$("#modal_enter_pin_title").text("Enter PIN to Export");
+		}
+		else if(source == "delete")
+		{
+			$("#modal_enter_pin_title").text("Enter PIN to Delete");
 		}
 		$("#modal_enter_pin_accept").data("source", source);
 	});
@@ -434,6 +452,36 @@ $("document").ready(function() {
 			$("#modal_accounts_info_address").val(account["accountRS"]);
 			$("#modal_accounts_info_public_key").val(account["publicKey"]);
 		}
+	})
+
+	$("#modal_accounts_new_add").click(function() {
+		storeAccount(pendingAccount);
+		pendingAccount = undefined;
+		loadAccounts();
+		$("#modal_accounts_new").modal("hide");
+	});
+	$("#modal_accounts_new_cancel").click(function() {
+		pendingAccount = undefined;
+	})
+
+	$("#modal_delete_delete").click(function(e) {
+		// actually delete now
+		$("#modal_delete").modal("hide");
+		var address = $("#accounts_account option:selected").text();
+		var data = localStorage["accounts"];
+		var accounts = JSON.parse(localStorage["accounts"]);
+
+		for(var a=0;a<accounts.length;a++)
+		{
+			if(accounts[a]["accountRS"] == address)
+			{
+				accounts.splice(a, 1);
+			}
+		}
+		localStorage["accounts"] = JSON.stringify(accounts);
+		loadAccounts();
+		$("#modal_basic_info").modal("show");
+		$("#modal_basic_info_title").text("Account Deleted");
 	})
 
 }) 
