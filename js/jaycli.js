@@ -260,6 +260,10 @@ function pinHandler(source, pin)
 	{
 		newPinHandler(pin);
 	}
+	if(source == "export")
+	{
+		exportHandler(pin);
+	}
 
 }
 
@@ -269,7 +273,7 @@ function accountsNewHandler(pin)
 	var account = newAccount(pin);
 
 	$("#modal_accounts_new_address").text(account["accountRS"]);
-	$("#modal_accounts_new_recovery").val(account["secretPhrase"]);
+	$("#modal_accounts_new_recovery").val(account["secretPhrase"].substring(4));
 
 	$("#modal_accounts_new_add").click(function() {
 		storeAccount(account);
@@ -303,6 +307,8 @@ function newPinHandler(pin)
 	var address = $("#accounts_account option:selected").text();
 	var accounts = JSON.parse(localStorage["accounts"]);
 	var oldpin = $("#modal_enter_pin").data("pin");
+	$("#modal_enter_pin").removeAttr("data-pin");
+
 
 	for(var a=0;a<accounts.length;a++)
 	{
@@ -318,6 +324,35 @@ function newPinHandler(pin)
 	$("#modal_basic_info").modal("show");
 	$("#modal_basic_info_title").text("PIN Change Successful");
 }
+
+function accountsNewHandler(pin)
+{
+	$("#modal_export").modal("show");
+	var address = $("#accounts_account option:selected").text();
+	account = findAccount(pin);
+
+	var data = decryptSecretPhrase(account.cipher, pin);
+	if(data === false)
+	{
+		// incorrect
+		$("#modal_basic_info").modal("show");
+		$("#modal_basic_info_title").text("Incorrect PIN");
+	}
+	else
+	{
+		$("#modal_export_key").val(data);
+	}
+
+	$("#modal_accounts_new_address").text(account["accountRS"]);
+	$("#modal_accounts_new_recovery").val(account["secretPhrase"].substring(4));
+
+	$("#modal_accounts_new_add").click(function() {
+		storeAccount(account);
+		loadAccounts();
+		$("#modal_accounts_new").modal("hide");
+	});
+}
+
 
 function findAccount(address)
 {
@@ -342,7 +377,7 @@ $("document").ready(function() {
 
 		if(source == "accounts_new")
 		{
-			$("#modal_enter_pin_title").text("Create New PIN");
+			$("#modal_enter_pin_title").text("Enter PIN for New Account");
 		}
 		else if(source == "change")
 		{
@@ -351,6 +386,10 @@ $("document").ready(function() {
 		else if(source == "newpin")
 		{
 			$("#modal_enter_pin_title").text("Enter New PIN");
+		}
+		else if(source =="export")
+		{
+			$("#modal_enter_pin_title").text("Enter PIN to Export")
 		}
 		$("#modal_enter_pin_accept").data("source", source);
 	});
