@@ -518,7 +518,8 @@ function tokenHandler(pin)
 	var address = $("#token_account option:selected").text();
 	var account = findAccount(address);
 	var secretPhrase = decryptSecretPhrase(account.cipher, pin, account.checksum);
-	var websiteString = $("#token_website_data").val();
+	var websiteString = $("#token_data").val();
+	alert(websiteString);
 	if(secretPhrase === false)
 	{
 		$("#modal_basic_info").modal("show");
