@@ -115,6 +115,127 @@ function simpleHash(message) {
 		return (v.concat(h));
 	}
 
+	function toByteArray(long) {
+    // we want to represent the input as a 8-bytes array
+    var byteArray = [0, 0, 0, 0];
+
+    for ( var index = 0; index < byteArray.length; index ++ ) {
+        var byte = long & 0xff;
+        byteArray [ index ] = byte;
+        long = (long - byte) / 256 ;
+    }
+
+    return byteArray;
+};
+
+function toIntVal(byteArray) {
+    // we want to represent the input as a 8-bytes array
+    var intval = 0;
+
+    for ( var index = 0; index < byteArray.length; index ++ ) {
+    	var byt = byteArray[index] & 0xFF;
+    	var value = byt * Math.pow(256, index);
+    	intval += value;
+    }
+
+    return intval;
+};
+
+function generateToken(websiteString, secretPhrase)
+{
+		//alert(converters.stringToHexString(websiteString));
+		var hexwebsite = converters.stringToHexString(websiteString);
+        var website = converters.hexStringToByteArray(hexwebsite);
+        var data = [];
+        data = website.concat(getPublicKey(secretPhrase));
+        var unix = Math.round(+new Date()/1000);
+        var timestamp = unix-epochNum;
+        var timestamparray = toByteArray(timestamp);
+        data = data.concat(timestamparray);
+
+        var token = [];
+        token = getPublicKey(secretPhrase).concat(timestamparray);
+
+        var sig = signBytes(data, secretPhrase);
+
+        token = token.concat(sig);
+        var buf = "";
+
+        for (var ptr = 0; ptr < 100; ptr += 5) {
+
+        	var nbr = [];
+        	nbr[0] = token[ptr] & 0xFF;
+        	nbr[1] = token[ptr+1] & 0xFF;
+        	nbr[2] = token[ptr+2] & 0xFF;
+        	nbr[3] = token[ptr+3] & 0xFF;
+        	nbr[4] = token[ptr+4] & 0xFF;
+        	var number = byteArrayToBigInteger(nbr);
+
+            if (number < 32) {
+                buf+="0000000";
+            } else if (number < 1024) {
+                buf+="000000";
+            } else if (number < 32768) {
+                buf+="00000";
+            } else if (number < 1048576) {
+                buf+="0000";
+            } else if (number < 33554432) {
+                buf+="000";
+            } else if (number < 1073741824) {
+                buf+="00";
+            } else if (number < 34359738368) {
+                buf+="0";
+            }
+            buf +=number.toString(32);
+
+        }
+        return buf;
+
+    }
+
+function parseToken(tokenString, website)
+{
+ 		var websiteBytes = converters.stringToByteArray(website);
+        var tokenBytes = [];
+        var i = 0;
+        var j = 0;
+
+        for (; i < tokenString.length; i += 8, j += 5) {
+
+        	var number = new BigInteger(tokenString.substring(i, i+8), 32);
+            var part = converters.hexStringToByteArray(number.toRadix(16));
+
+            tokenBytes[j] = part[4];
+            tokenBytes[j + 1] = part[3];
+            tokenBytes[j + 2] = part[2];
+            tokenBytes[j + 3] = part[1];
+            tokenBytes[j + 4] = part[0];
+
+        }
+
+        if (i != 160) {
+            new Error("tokenString parsed to invalid size");
+        }
+        var publicKey = [];
+        publicKey = tokenBytes.slice(0, 32);
+        var timebytes = [tokenBytes[32], tokenBytes[33], tokenBytes[34], tokenBytes[35]];
+
+        var timestamp = toIntVal(timebytes);
+        var signature = tokenBytes.slice(36, 100);
+
+        var data = websiteBytes.concat(tokenBytes.slice(0, 36));
+       	
+        var isValid = verifyBytes(signature, data, publicKey);
+
+        var ret = {};
+        ret.isValid = isValid;
+        ret.timestamp = timestamp;
+        ret.publicKey = converters.byteArrayToHexString(publicKey);
+
+        return ret;
+
+}
+
 
 function pad(length, val) {
     var array = [];
@@ -139,20 +260,22 @@ function rndstr(len)
 
 function generateSecretPhrase()
 {
-	return "JAY_" + rndstr(30);
+	return rndstr(30);
 }
 
 function encryptSecretPhrase(phrase, key)
 {
 	var rkey = prepKey(key);
+	alert(converters.stringToByteArray(phrase))
 	return CryptoJS.AES.encrypt(phrase, rkey);
 }
 
-function decryptSecretPhrase(cipher, key)
+function decryptSecretPhrase(cipher, key, checksum)
 {
 	var rkey = prepKey(key);
 	var data = CryptoJS.AES.decrypt(cipher, rkey);
-	if(data.sigBytes > 0 && converters.hexStringToString(data.toString()).indexOf("JAY_") == 0)
+
+	if(converters.byteArrayToHexString(simpleHash(converters.hexStringToByteArray(data.toString()))) == checksum)
 	 return converters.hexStringToString(data.toString());
 	else return false;
 }
@@ -168,14 +291,15 @@ function prepKey(key)
 	return digest;
 }
 
-function newAccount(key)
+function newAccount(secretPhrase, key)
 {
 	var accountData = {};
-	accountData["secretPhrase"] = generateSecretPhrase();
+	accountData["secretPhrase"] = secretPhrase;
 	accountData["publicKey"] = converters.byteArrayToHexString(getPublicKey(accountData["secretPhrase"]));
 	accountData["accountRS"] = getAccountIdFromPublicKey(accountData["publicKey"], true);
 	accountData["key"] = key;
 	accountData["cipher"] = encryptSecretPhrase(accountData["secretPhrase"], key).toString();
+	accountData["checksum"] = converters.byteArrayToHexString(simpleHash(converters.stringToByteArray(accountData["secretPhrase"])));
 	return accountData;
 }
 
@@ -190,6 +314,7 @@ function storeAccount(account)
 	acc["accountRS"] = account["accountRS"];
 	acc["publicKey"] = account["publicKey"];
 	acc["cipher"] = account["cipher"];
+	acc["checksum"] = account["checksum"];
 	sto.push(acc);
 
 	localStorage["accounts"] = JSON.stringify(sto);
@@ -203,7 +328,7 @@ var pendingAccount;
 function popoutOpen()
 {
 	// ok lets deal with any popup setup thats needed.
-	if(!localStorage["accounts"] || localStorage["accounts"].length == 0)
+	if(!localStorage["accounts"] || JSON.parse(localStorage["accounts"]).length == 0)
 	{
 		// no accounts, take us to the accounts tab first..
 		$("#popout_tabs a[href='#accounts']").tab("show");
@@ -227,7 +352,10 @@ function loadAccounts()
 			addAccountOption(accounts[a]["accountRS"]);
 		}
 	}
-
+	else
+	{
+		addAccountOption(noAccountsMessage);
+	}
 }
 
 function addAccountOption(option)
@@ -254,39 +382,48 @@ function pinHandler(source, pin)
 	{
 		accountsNewHandler(pin);
 	}
-	if(source == "change")
+	else if(source == "change")
 	{
 		changePinHandler(pin);
 	}
-	if(source == "newpin")
+	else if(source == "newpin")
 	{
 		newPinHandler(pin);
 	}
-	if(source == "export")
+	else if(source == "export")
 	{
 		exportHandler(pin);
 	}
-	if(source == "delete")
+	else if(source == "delete")
 	{
 		deleteHandler(pin);
 	}
+	else if(source == "import")
+	{
+		importHandler(pin);
+	}
+	else if(source == "token")
+	{
+		tokenHandler(pin);
+	}
+
 
 }
 
 function accountsNewHandler(pin)
 {
 	$("#modal_accounts_new").modal("show");
-	var account = newAccount(pin);
+	var account = newAccount(generateSecretPhrase(), pin);
 	pendingAccount = account;
 	$("#modal_accounts_new_address").text(account["accountRS"]);
-	$("#modal_accounts_new_recovery").val(account["secretPhrase"].substring(4));
+	$("#modal_accounts_new_recovery").val(account["secretPhrase"]);
 }
 
 function changePinHandler(pin)
 {
 	var address = $("#accounts_account option:selected").text();
 	var account = findAccount(address);
-	var data = decryptSecretPhrase(account.cipher, pin);
+	var data = decryptSecretPhrase(account.cipher, pin, account.checksum);
 	if(data === false)
 	{
 		// incorrect
@@ -315,7 +452,7 @@ function newPinHandler(pin)
 		if(accounts[a]["accountRS"] == address)
 		{
 			// now lets handle...
-			var sec = decryptSecretPhrase(accounts[a]["cipher"], oldpin).toString();
+			var sec = decryptSecretPhrase(accounts[a]["cipher"], oldpin, accounts[a]["checksum"]).toString();
 			var newcipher = encryptSecretPhrase(sec, pin).toString();
 			accounts[a]["cipher"] = newcipher;
 		}
@@ -329,8 +466,7 @@ function exportHandler(pin)
 {
 	var address = $("#accounts_account option:selected").text();
 	account = findAccount(address);
-
-	var data = decryptSecretPhrase(account.cipher, pin);
+	var data = decryptSecretPhrase(account.cipher, pin, account.checksum);
 	if(data === false)
 	{
 		// incorrect
@@ -341,7 +477,7 @@ function exportHandler(pin)
 	{
 		$("#modal_export").modal("show");
 		$("#modal_export_address").text(account["accountRS"]);
-		$("#modal_export_key").val(data.substring(4));
+		$("#modal_export_key").val(data);
 		data = undefined;
 	}
 }
@@ -351,7 +487,7 @@ function deleteHandler(pin)
 	var address = $("#accounts_account option:selected").text();
 	account = findAccount(address);
 
-	var data = decryptSecretPhrase(account.cipher, pin);
+	var data = decryptSecretPhrase(account.cipher, pin, account.checksum);
 	if(data === false)
 	{
 		// incorrect
@@ -366,6 +502,35 @@ function deleteHandler(pin)
 	}
 }
 
+function importHandler(pin)
+{
+	var secretPhrase = $("#modal_import").data("import");
+	$("#modal_import").data("import", "");
+	var account = newAccount(secretPhrase, pin);
+	storeAccount(account);
+	loadAccounts();
+	$("#modal_basic_info").modal("show");
+	$("#modal_basic_info_title").text("Account Successfully Imported");
+}
+
+function tokenHandler(pin)
+{
+	var address = $("#token_account option:selected").text();
+	var account = findAccount(address);
+	var secretPhrase = decryptSecretPhrase(account.cipher, pin, account.checksum);
+	var websiteString = $("#token_website_data").val();
+	if(secretPhrase === false)
+	{
+		$("#modal_basic_info").modal("show");
+		$("#modal_basic_info_title").text("Incorrect PIN");
+	}
+	else
+	{
+		var token = generateToken(websiteString, secretPhrase);
+		$("#modal_token_box").val(token);
+		$("#modal_token").modal("show");
+	}
+}
 
 
 function findAccount(address)
@@ -408,6 +573,14 @@ $("document").ready(function() {
 		else if(source == "delete")
 		{
 			$("#modal_enter_pin_title").text("Enter PIN to Delete");
+		}
+		else if(source == "import")
+		{
+			$("#modal_enter_pin_title").text("Enter PIN for New Account");
+		}
+		else if(source == "token")
+		{
+			$("#modal_enter_pin_title").text("Enter PIN to Create Token");
 		}
 		$("#modal_enter_pin_accept").data("source", source);
 	});
@@ -459,6 +632,8 @@ $("document").ready(function() {
 		pendingAccount = undefined;
 		loadAccounts();
 		$("#modal_accounts_new").modal("hide");
+		$("#modal_basic_info").modal("show");
+		$("#modal_basic_info_title").text("Account Successfully Added");
 	});
 	$("#modal_accounts_new_cancel").click(function() {
 		pendingAccount = undefined;
@@ -482,6 +657,14 @@ $("document").ready(function() {
 		loadAccounts();
 		$("#modal_basic_info").modal("show");
 		$("#modal_basic_info_title").text("Account Deleted");
+	});
+
+	$("#modal_import_add").click(function() {
+		$("#modal_import").data("import", $("#modal_import_key").val());
+		$("#modal_import").modal("hide");
+		$("#modal_import_key").val("");
+		$("#modal_enter_pin").data("source", "import");
+		$("#modal_enter_pin").modal("show");
 	})
 
 }) 
