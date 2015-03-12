@@ -408,7 +408,10 @@ function pinHandler(source, pin)
 	{
 		tokenHandler(pin);
 	}
-
+	else if(source == "quicksend")
+	{
+		quicksendHandler(pin);
+	}
 
 }
 
@@ -460,8 +463,7 @@ function newPinHandler(pin)
 		}
 	}
 	localStorage["accounts"] = JSON.stringify(accounts);
-	$("#modal_basic_info").modal("show");
-	$("#modal_basic_info_title").text("PIN Change Successful");
+	infoModal("PIN Change Successful");
 }
 
 function exportHandler(pin)
@@ -472,8 +474,7 @@ function exportHandler(pin)
 	if(data === false)
 	{
 		// incorrect
-		$("#modal_basic_info").modal("show");
-		$("#modal_basic_info_title").text("Incorrect PIN");
+		infoModal("Incorrect PIN");
 	}
 	else
 	{
@@ -493,8 +494,7 @@ function deleteHandler(pin)
 	if(data === false)
 	{
 		// incorrect
-		$("#modal_basic_info").modal("show");
-		$("#modal_basic_info_title").text("Incorrect PIN");
+		infoModal("Incorrect PIN");
 	}
 	else
 	{
@@ -511,8 +511,7 @@ function importHandler(pin)
 	var account = newAccount(secretPhrase, pin);
 	storeAccount(account);
 	loadAccounts();
-	$("#modal_basic_info").modal("show");
-	$("#modal_basic_info_title").text("Account Successfully Imported");
+	infoModal("Account Successfully Imported");
 }
 
 function tokenHandler(pin)
@@ -524,8 +523,7 @@ function tokenHandler(pin)
 
 	if(secretPhrase === false)
 	{
-		$("#modal_basic_info").modal("show");
-		$("#modal_basic_info_title").text("Incorrect PIN");
+		infoModal("Incorrect PIN");
 	}
 	else
 	{
@@ -533,6 +531,81 @@ function tokenHandler(pin)
 		$("#modal_token_box").val(token);
 		$("#modal_token").modal("show");
 	}
+}
+
+function isHex(hex)
+{
+	for(var a=0;a<hex.length;a++)
+	{
+		var p = hex.charCodeAt(a)
+		if((p < 48) || (p > 57 && p < 65) || (p > 70 && p < 97) || (p > 102))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+function startTransact()
+{
+	var account = $("#transact_account option:selected").val();
+	var tx = $("#transact_transaction").val();
+	// decide what kind of tx it is
+	if(tx.indexOf("NXT-") == 0)
+	{
+		// nxt addy, quicksend format...
+		startQuicsend(account, tx);
+	}
+	else if(tx.indexOf("TX_") == 0)
+	{
+		// TRF
+	}
+	else
+	{
+		if(isHex(tx))
+		{
+			// its hex
+		}
+		else
+		{
+			infoModal("Transaction Format Unrecognized")
+		}
+	}
+}
+
+function startQuicksend(sender, recipient)
+{
+	$("#modal_quicksend").modal("show");
+	$("#modal_quicksend_address").val(recipient);
+	$("#modal_quicksend").data("sender", sender);
+}
+
+function quicksendHandler(pin)
+{
+	var amount = $("#modal_enter_pin").data("amount");
+	$("#modal_enter_pin").removeAttr("data-amount");
+	var recipient = $("#modal_enter_pin").data("recipient");
+	$("#modal_enter_pin").removeAttr("data-recipient");
+	var sender = $("#modal_enter_pin").data("sender");
+	$("#modal_enter_pin").removeAttr("data-sender");
+	var account = findAccount(sender)
+
+	var secretPhrase = decryptSecretPhrase(account.cipher, pin, account.checksum);
+
+	if(secretPhrase === false)
+	{
+		infoModal("Incorrect PIN");
+	}
+	else
+	{
+		// now we open the "are you sure" modal...tomorrow..
+	}
+}
+
+function infoModal(message)
+{
+	$("#modal_basic_info").modal("show");
+	$("#modal_basic_info_title").text(message);
 }
 
 
@@ -584,6 +657,10 @@ $("document").ready(function() {
 		else if(source == "token")
 		{
 			$("#modal_enter_pin_title").text("Enter PIN to Create Token");
+		}
+		else if(source == "quicksend")
+		{
+			$("#modal_enter_pin_title").text("Enter PIN to Quicksend");
 		}
 		$("#modal_enter_pin_accept").data("source", source);
 	});
@@ -646,8 +723,7 @@ $("document").ready(function() {
 		pendingAccount = undefined;
 		loadAccounts();
 		$("#modal_accounts_new").modal("hide");
-		$("#modal_basic_info").modal("show");
-		$("#modal_basic_info_title").text("Account Successfully Added");
+		infoModal("Account Successfully Added");
 	});
 	$("#modal_accounts_new_cancel").click(function() {
 		pendingAccount = undefined;
@@ -669,8 +745,7 @@ $("document").ready(function() {
 		}
 		localStorage["accounts"] = JSON.stringify(accounts);
 		loadAccounts();
-		$("#modal_basic_info").modal("show");
-		$("#modal_basic_info_title").text("Account Deleted");
+		infoModal("Account Deleted");
 	});
 
 	$("#modal_import_add").click(function() {
@@ -684,6 +759,25 @@ $("document").ready(function() {
 	$("#token_form").submit(function(e) {
 		e.preventDefault();
 		$("#modal_enter_pin").data("source", "token");
+		$("#modal_enter_pin").modal("show");
+	})
+
+	$("#transact_continue").click(function() {
+		startTransact();
+	})
+	$("#transact_form").submit(function() {
+		startTransact();
+	})
+
+	$("#modal_quicksend_send").click(function() {
+		var amount = $("#modal_quicksend_amount").val();
+		$("#modal_quicksend_amount").val("");
+		var sender = $("#modal_quicksend").data("sender");
+		var recipient = $("#modal_quicksend_address").val();
+		$("#modal_enter_pin").data("source", "quicksend");
+		$("#modal_enter_pin").data("amount", amount);
+		$("#modal_enter_pin").data("sender", sender);
+		$("#modal_enter_pin").data("recipient", recipient);
 		$("#modal_enter_pin").modal("show");
 	})
 
