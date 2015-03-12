@@ -266,7 +266,6 @@ function generateSecretPhrase()
 function encryptSecretPhrase(phrase, key)
 {
 	var rkey = prepKey(key);
-	alert(converters.stringToByteArray(phrase))
 	return CryptoJS.AES.encrypt(phrase, rkey);
 }
 
@@ -554,7 +553,7 @@ function startTransact()
 	if(tx.indexOf("NXT-") == 0)
 	{
 		// nxt addy, quicksend format...
-		startQuicsend(account, tx);
+		startQuicksend(account, tx);
 	}
 	else if(tx.indexOf("TX_") == 0)
 	{
@@ -598,8 +597,67 @@ function quicksendHandler(pin)
 	}
 	else
 	{
+		var quickbytes = createQuicksend(recipient, sender, amount, secretPhrase);
+		$("#modal_quick_sure").data("tx", converters.byteArrayToHexString(quickbytes));
+		$("#modal_quick_sure_sender").text(sender);
+		$("#modal_quick_sure_recipient").text(recipient);
+		$("#modal_quick_sure_amount").text(amount + " nxt");
+		$("#modal_quick_sure").modal("show");
+
 		// now we open the "are you sure" modal...tomorrow..
 	}
+}
+
+function createQuicksend(recipient, amount, secretPhrase)
+{
+	var zeroArray = [0];
+	var txbytes = [];
+
+	txbytes.push(0) // type
+
+	var version = 1;
+	var subtype = 0;
+	txbytes.push(subtype + (version << 4));
+
+	var timestamp = Math.floor(Date.now() / 1000) - 1385294400;
+	txbytes = txbytes.concat(converters.int32ToBytes(timestamp));
+
+	txbytes = txbytes.concat(deadlineBytes(1440));
+
+	txbytes = txbytes.concat(getPublicKey(secretPhrase));
+	var rec = new NxtAddress();
+	rec.set(recipient);
+	var recip = (new BigInteger(rec.account_id())).toByteArray().reverse();
+	txbytes = txbytes.concat(recip);
+
+	var amt = ((new BigInteger(String(parseInt(amount*100000000))))).toByteArray().reverse();
+	while(amount.length < 8) amount = amount.concat(zeroArray);
+	txbytes = txbytes.concat(amount);
+
+	var fee = (converters.int32ToBytes(100000000))
+	while(fee.length < 8) fee = fee.concat(zeroArray);
+	txbytes = txbytes.concat(fee);
+
+	txbytes = txbytes.concat(pad(32, 0)); // ref full hash
+
+	txbytes = converters.hexStringToByteArray(converters.byteArrayToHexString(txbytes));
+	var signable = txbytes;
+	txbytes = txbytes.concat(pad(64, 0)); // signature
+	
+	txbytes = txbytes.concat(pad(16, 0)); // ignore everything else
+
+	var sig = signBytes(txbytes, secretPhrase);
+	signable = signable.concat(sig);
+
+	signable = signable.concat(pad(16, 0)); // ignore everything else
+
+	// now we have a full tx...
+	return signable;		
+}
+
+function deadlineBytes(word)
+{
+	return [Math.floor(word/256), (word%256)];
 }
 
 function infoModal(message)
@@ -770,6 +828,7 @@ $("document").ready(function() {
 	})
 
 	$("#modal_quicksend_send").click(function() {
+		$("#modal_quicksend").modal("hide");
 		var amount = $("#modal_quicksend_amount").val();
 		$("#modal_quicksend_amount").val("");
 		var sender = $("#modal_quicksend").data("sender");
