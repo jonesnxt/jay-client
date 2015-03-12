@@ -366,6 +366,7 @@ function addAccountOption(option)
 	}
 	$("#transact_account").append("<option>"+option+"</option>");
 	$("#token_account").append("<option>"+option+"</option>");
+	$("#decrypt_account").append("<option>"+option+"</option>");
 	$("#accounts_account").append("<option>"+option+"</option>");
 }
 
@@ -373,6 +374,7 @@ function clearAccountOptions()
 {
 	$("#transact_account").html("");
 	$("#token_account").html("");
+	$("#decrypt_account").html("");
 	$("#accounts_account").html("");
 }
 
@@ -519,7 +521,7 @@ function tokenHandler(pin)
 	var account = findAccount(address);
 	var secretPhrase = decryptSecretPhrase(account.cipher, pin, account.checksum);
 	var websiteString = $("#token_data").val();
-	alert(websiteString);
+
 	if(secretPhrase === false)
 	{
 		$("#modal_basic_info").modal("show");
@@ -628,6 +630,17 @@ $("document").ready(function() {
 		}
 	})
 
+	$("#modal_backup").on("show.bs.modal", function(e) {
+		if(localStorage["accounts"] && JSON.parse(localStorage["accounts"]).length != 0)
+		{
+			$("#modal_backup_box").val(localStorage["accounts"]);
+		}
+		else 
+		{
+			$("#modal_backup_box").val("No accounts are added.")
+		}
+	})
+
 	$("#modal_accounts_new_add").click(function() {
 		storeAccount(pendingAccount);
 		pendingAccount = undefined;
@@ -665,6 +678,12 @@ $("document").ready(function() {
 		$("#modal_import").modal("hide");
 		$("#modal_import_key").val("");
 		$("#modal_enter_pin").data("source", "import");
+		$("#modal_enter_pin").modal("show");
+	})
+
+	$("#token_form").submit(function(e) {
+		e.preventDefault();
+		$("#modal_enter_pin").data("source", "token");
 		$("#modal_enter_pin").modal("show");
 	})
 
