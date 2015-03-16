@@ -558,12 +558,14 @@ function startTransact()
 	else if(tx.indexOf("TX_") == 0)
 	{
 		// TRF
+		startTRF(account, tx);
 	}
 	else
 	{
 		if(isHex(tx))
 		{
 			// its hex
+			startHex(account, tx);
 		}
 		else
 		{
@@ -578,6 +580,36 @@ function startQuicksend(sender, recipient)
 	$("#modal_quicksend_address").val(recipient);
 	$("#modal_quicksend").data("sender", sender);
 }
+
+/*
+"TX_" + 
+Base62(
+1 byte TRF ver.
+1 byte type
+1 byte version/subtype
+8 bytes recipient/genesis
+8 bytes amount
+8 bytes fee
+2 bytes flags
+attachment
+appendages)
+
+29 bytes normal tx...
+*/
+
+function startTRF(sender, trfBytes)
+{
+	var hex = base62Decode(trfBytes.substring(3));
+	if(hex[0] == 'f' && hex[1] == 'f') startHex(sender, hex.substring(2));
+
+}
+
+function startHex(sender, hexBytes)
+{
+
+}
+
+
 
 function quicksendHandler(pin)
 {
