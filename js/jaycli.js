@@ -244,10 +244,66 @@ function pad(length, val) {
     }
     return array;
 }
+// 48 -> 57
+// 97 -> 122
+// 65 -> 90
+
+	/**
+	 * Encoders and decoders for base-62 formatted data. Uses the alphabet 0..9 a..z
+	 * A..Z, e.g. '0' => 0, 'a' => 10, 'A' => 35 and 'Z' => 61.
+	 * 
+	 */
+	 	var BASE62 = new BigInteger("62");
+
+	  function valueForByte(key) {
+	  	var p = key;
+		if(p > 48 && p < 57)
+		{
+			return p - 48;
+		}
+		else if(p > 97 && p < 122)
+		{
+			return p - 97 + 10;
+		}
+		else if(p > 65 && p < 90)
+		{
+			return p - 65 + 10 + 26;
+		}
+	    new Error("base62 digit not found");
+	    return -1;
+	  }
+
+	  /**
+	   * Convert a base-62 string known to be a number.
+	   * 
+	   * @param s
+	   * @return
+	   */
+		function base62Decode(s) {
+	    return base62DecodeBytes(converters.stringToByteArray(s));
+	  }
+
+	  /**
+	   * Convert a base-62 string known to be a number.
+	   * 
+	   * @param s
+	   * @return
+	   */
+	  	function base62DecodeBytes(bytes) {
+	    var res = new BigInteger("0");
+	    var multiplier = new BigInteger("1");
+
+	    for (var i = bytes.length - 1; i >= 0; i--) {
+	      res = res.add(multiplier.multiply(new BigInteger(valueForByte(bytes[i]).toString())));
+	      multiplier = multiplier.multiply(BASE62);
+	    }
+	    var btr = res.toByteArray();
+	    return positiveByteArray(btr);
+	  }
 
 function rndstr(len)
 {
-	var letters = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+	var letters = "abcdefghjkmnpqrtuvwxyABCDEFGHJKLMNPQRTUVWXY3456789";
 	var ret = "";
 	var nums = window.crypto.getRandomValues(new Uint32Array(len));
 
@@ -565,7 +621,14 @@ function startTransact()
 		if(isHex(tx))
 		{
 			// its hex
-			startHex(account, tx);
+			if(tx.length == 64)
+			{
+				startQuicksend(account, tx, true);
+			}
+			else
+			{
+				startHex(account, tx);
+			}
 		}
 		else
 		{
@@ -574,14 +637,23 @@ function startTransact()
 	}
 }
 
-function startQuicksend(sender, recipient)
+function startQuicksend(sender, recipient, pub)
 {
 	$("#modal_quicksend").modal("show");
-	$("#modal_quicksend_address").val(recipient);
+	if(pub == undefined || pub == false)
+	{
+		$("#modal_quicksend_address").val(recipient);
+	}
+	else if(pub == true)
+	{
+		var accid = getAccountIdFromPublicKey(recipient, true);
+		$("#modal_quicksend_address").val(accid);
+	}
 	$("#modal_quicksend").data("sender", sender);
+	$("#modal_quicksend").data("recipient", recipient);
 }
 
-/*
+/*255 here..
 "TX_" + 
 Base62(
 1 byte TRF ver.
@@ -597,16 +669,51 @@ appendages)
 29 bytes normal tx...
 */
 
+function currentNxtTime()
+{
+	return Math.floor(Date.now() / 1000) - 1385294400;
+}
+
+function nxtTimeBytes()
+{
+	return converters.int32ToBytes(currentNxtTime());
+}
+
+function positiveByteArray(byteArray)
+{
+	return converters.hexStringToByteArray(converters.byteArrayToHexString(byteArray));
+}
+
 function startTRF(sender, trfBytes)
 {
-	var hex = base62Decode(trfBytes.substring(3));
-	if(hex[0] == 'f' && hex[1] == 'f') startHex(sender, hex.substring(2));
+	var bytes = base62Decode(trfBytes.substring(3));
+	if(bytes[0] == '255')
+	{
+		var collect = [];
+		collect = bytes[0].concat(bytes[1]); // type ver & subtype
+		collect = collect.concat(nxtTimeBytes()); // timestamp
+		collect = collect.concat(wordBytes(1440)); // deadline
+		var senderPubKey = converters.hexStringToByteArray(findAccount(sender).publicKey);
+		collect = collect.concat(senderPubKey);
+		collect = collect.concat(bytes.slice(2, 2+8)); // recipient/genesis
+		collect = collect.concat(bytes.slice(10, 10+8)); // amount
+		collect = collect.concat(bytes.slice(18, 18+8)); // fee
+		collect = collect.concat(pad(32, 0)); // reftxhash
+		collect = collect.concat(pad(64, 0)); // signature bytes
+		collect = collect.concat(bytes.slice(26, 26+2)); // flags
+		collect = collect.concat(pad(4, 0)); // EC blockheight
+		collect = collect.concat(pad(8, 0)); // EC blockid
+		if(bytes.length < 28) collect = collect.concat(bytes.slice(28)); // attachment/appendages
+		startHex(converters.byteArrayToHexString(collect));
+	}
+
 
 }
 
-function startHex(sender, hexBytes)
+function startHex(hex)
 {
-
+	// now we have hex bytes, lets deal with them...
+	var bytes = converters.hexStringToByteArray(hex);
 }
 
 
@@ -629,10 +736,17 @@ function quicksendHandler(pin)
 	}
 	else
 	{
-		var quickbytes = createQuicksend(recipient, sender, amount, secretPhrase);
+		var quickbytes = createQuicksend(recipient, amount, secretPhrase);
 		$("#modal_quick_sure").data("tx", converters.byteArrayToHexString(quickbytes));
 		$("#modal_quick_sure_sender").text(sender);
-		$("#modal_quick_sure_recipient").text(recipient);
+		if(recipient.indexOf("NXT-") == 0)
+		{
+			$("#modal_quick_sure_recipient").text(recipient);
+		}
+		else
+		{
+			$("#modal_quick_sure_recipient").text(getAccountIdFromPublicKey(recipient, true) + " (with Public Key)");
+		}
 		$("#modal_quick_sure_amount").text(amount + " nxt");
 		$("#modal_quick_sure").modal("show");
 
@@ -642,54 +756,67 @@ function quicksendHandler(pin)
 
 function createQuicksend(recipient, amount, secretPhrase)
 {
-	var zeroArray = [0];
 	var txbytes = [];
-
 	txbytes.push(0) // type
+	txbytes.push(0 + (1 << 4)); // version/type
+	txbytes = txbytes.concat(nxtTimeBytes()); // timestmp
+	txbytes = txbytes.concat(wordBytes(1440)); // deadline
+	txbytes = txbytes.concat(getPublicKey(secretPhrase)); // public Key
 
-	var version = 1;
-	var subtype = 0;
-	txbytes.push(subtype + (version << 4));
-
-	var timestamp = Math.floor(Date.now() / 1000) - 1385294400;
-	txbytes = txbytes.concat(converters.int32ToBytes(timestamp));
-
-	txbytes = txbytes.concat(deadlineBytes(1440));
-
-	txbytes = txbytes.concat(getPublicKey(secretPhrase));
+	if(recipient.indexOf("NXT-") == 0)
+	{
+		recipientRS = recipient;
+	}
+	else
+	{
+		recipientRS = getAccountIdFromPublicKey(recipient, true);
+	}
 	var rec = new NxtAddress();
-	rec.set(recipient);
+	rec.set(recipientRS);
 	var recip = (new BigInteger(rec.account_id())).toByteArray().reverse();
+	if(recip.length == 9) recip = recip.slice(0, 8);
+	while(recip.length < 8) recip = recip.concat(pad(1, 0));
 	txbytes = txbytes.concat(recip);
 
 	var amt = ((new BigInteger(String(parseInt(amount*100000000))))).toByteArray().reverse();
-	while(amount.length < 8) amount = amount.concat(zeroArray);
-	txbytes = txbytes.concat(amount);
+	if(amt.length == 9) amt = amt.slice(0, 8);
+	while(amt.length < 8) amt = amt.concat(pad(1, 0));
+	txbytes = txbytes.concat(amt); 
 
-	var fee = (converters.int32ToBytes(100000000))
-	while(fee.length < 8) fee = fee.concat(zeroArray);
+	var fee = (converters.int32ToBytes(100000000));
+	while(fee.length < 8) fee = fee.concat(pad(1, 0));
 	txbytes = txbytes.concat(fee);
 
 	txbytes = txbytes.concat(pad(32, 0)); // ref full hash
-
-	txbytes = converters.hexStringToByteArray(converters.byteArrayToHexString(txbytes));
-	var signable = txbytes;
 	txbytes = txbytes.concat(pad(64, 0)); // signature
-	
-	txbytes = txbytes.concat(pad(16, 0)); // ignore everything else
 
+	if(recipient.indexOf("NXT-") == 0)
+	{
+		txbytes = txbytes.concat(pad(16, 0)); // ignore everything else
+	}
+	else
+	{
+		txbytes.push(4);
+		txbytes = txbytes.concat(pad(3, 0));
+		txbytes = txbytes.concat(pad(12, 0));
+		txbytes = txbytes.concat([1]);
+		txbytes = txbytes.concat(converters.hexStringToByteArray(recipient));
+	}
+
+	txbytes = positiveByteArray(txbytes);
 	var sig = signBytes(txbytes, secretPhrase);
-	signable = signable.concat(sig);
 
-	signable = signable.concat(pad(16, 0)); // ignore everything else
+	signable = txbytes.slice(0, 96);
+	signable = signable.concat(sig);
+	signable = txbytes.slice(96+64);
 
 	// now we have a full tx...
-	return signable;		
+	return signable;
 }
 
-function deadlineBytes(word)
+function wordBytes(word)
 {
-	return [Math.floor(word/256), (word%256)];
+	return [(word%256), Math.floor(word/256)];
 }
 
 function infoModal(message)
@@ -864,7 +991,7 @@ $("document").ready(function() {
 		var amount = $("#modal_quicksend_amount").val();
 		$("#modal_quicksend_amount").val("");
 		var sender = $("#modal_quicksend").data("sender");
-		var recipient = $("#modal_quicksend_address").val();
+		var recipient = $("#modal_quicksend").data("recipient");
 		$("#modal_enter_pin").data("source", "quicksend");
 		$("#modal_enter_pin").data("amount", amount);
 		$("#modal_enter_pin").data("sender", sender);
