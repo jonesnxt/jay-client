@@ -714,8 +714,63 @@ function startHex(hex)
 {
 	// now we have hex bytes, lets deal with them...
 	var bytes = converters.hexStringToByteArray(hex);
+
+	// get important things from this, verify it?..
+	extractBytesData(bytes);
 }
 
+function extractBytesData(bytes)
+{
+	// lets think here.
+	// first we take out the version and subversion, and then think from there
+	// have about 8 different places to put data, then account for all possible types
+	// appendages will have dropdowns with their content and won't take up much room.
+	// the 8 zones will need to be really small.
+	// type sender amount recip extra for attachment...
+	var type = bytes[0];
+	var subtype = bytes[1] << 8;
+	if(type == 0)
+	{
+		if(subtype == 0) typeName = "Ordinary Payment";
+	}
+	else if(type == 1)
+	{
+		if(subtype == 0) typeName = "Arbitrary Message";
+		else if(subtype == 1) typeName = "Alias Assignment";
+		else if(subtype == 2) typeName = "Poll Creation";
+		else if(subtype == 3) typeName = "Vote Casting";
+		else if(subtype == 4) typeName = "Hub Announcement";
+		else if(subtype == 5) typeName = "Account Info";
+		else if(subtype == 6) typeName = "Alias Sell";
+		else if(subtype == 7) typeName = "Alias Buy";
+	}
+	else if(type == 2)
+	{
+		if(subtype == 0) typeName = "Asset Issuance";
+		else if(subtype == 1) typeName = "Asset Transfer";
+		else if(subtype == 2) typeName = "Ask Order Placement";
+		else if(subtype == 3) typeName = "Bid Order Placement";
+		else if(subtype == 4) typeName = "Ask Order Cancellation";
+		else if(subtype == 5) typeName = "Bid Order Cancellation";
+	}
+	else if(type == 3)
+	{
+		if(subtype == 0) typeName = "Goods Listing";
+		else if(subtype == 1) typeName = "Goods Delisting";
+		else if(subtype == 2) typeName = "Price Change";
+		else if(subtype == 3) typeName = "Quantity Change";
+		else if(subtype == 4) typeName = "Purchase";
+		else if(subtype == 5) typeName = "Delivery";
+		else if(subtype == 6) typeName = "Feedback";
+		else if(subtype == 7) typeName = "Refund";
+	}
+	else if(type == 4)
+	{
+		if(subtype == 0) typeName = "Balance Leasing";
+	}
+	
+	$("#modal_review").modal("show");
+}
 
 
 function quicksendHandler(pin)
