@@ -737,6 +737,7 @@ function extractBytesData(bytes)
 	var amount = byteArrayToBigInteger(bytes.slice(48, 48+8));
 	var fee = byteArrayToBigInteger(bytes.slice(56, 56+8));
 	var flags = converters.byteArrayToSignedInt32(bytes.slice(160, 160+4));
+	if(bytes.length > 176) var rest = bytes.slice(176);
 	if(type == 0)
 	{
 		if(subtype == 0)
@@ -759,16 +760,48 @@ function extractBytesData(bytes)
 			setReview(3, "Recipient", recipient);
 			setReview(4, "Fee", fee/100000000 + " nxt");
 		}
-		else if(subtype == 1) typeName = "Alias Assignment";
+		else if(subtype == 1) 
 		{
-			
+			typeName = "Alias Assignment";
+			setReview(1, "Type", typeName);
+			setReview(2, "Registrar", sender);
+			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
+			setReview(3, "Alias Name", alias);
+			setReview(4, "Fee", fee/100000000 + " nxt");
+			var data = converters.byteArrayToString(rest.slice(2+rest[1], 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
+			setReview(5, "Data", data);
 		}
-		else if(subtype == 2) typeName = "Poll Creation";
-		else if(subtype == 3) typeName = "Vote Casting";
-		else if(subtype == 4) typeName = "Hub Announcement";
-		else if(subtype == 5) typeName = "Account Info";
-		else if(subtype == 6) typeName = "Alias Sell";
-		else if(subtype == 7) typeName = "Alias Buy";
+		else if(subtype == 2)
+		{
+			typeName = "Poll Creation";
+		}
+		else if(subtype == 3) 
+		{
+			typeName = "Vote Casting";
+		}
+		else if(subtype == 4)
+		{
+			typeName = "Hub Announcement";
+		}
+		else if(subtype == 5) 
+		{
+			typeName = "Account Info";
+			setReview(1, "Type", typeName);
+			setReview(2, "Account", sender);
+			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
+			setReview(3, "Name", alias);
+			setReview(4, "Fee", fee/100000000 + " nxt");
+			var data = converters.byteArrayToString(rest.slice(2+rest[1], 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
+			setReview(5, "Description", data);
+		}
+		else if(subtype == 6) 
+		{
+			typeName = "Alias Sell";
+		}
+		else if(subtype == 7) 
+		{
+			typeName = "Alias Buy";
+		}
 	}
 	else if(type == 2)
 	{
@@ -904,6 +937,11 @@ function createQuicksend(recipient, amount, secretPhrase)
 function wordBytes(word)
 {
 	return [(word%256), Math.floor(word/256)];
+}
+
+function bytesWord(bytes)
+{
+	return bytes[1]*256+bytes[0];
 }
 
 function infoModal(message)
