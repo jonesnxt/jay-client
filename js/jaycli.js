@@ -727,16 +727,42 @@ function extractBytesData(bytes)
 	// appendages will have dropdowns with their content and won't take up much room.
 	// the 8 zones will need to be really small.
 	// type sender amount recip extra for attachment...
+	$("#modal_review").data("bytes", bytes);
 	var type = bytes[0];
 	var subtype = bytes[1] << 8;
+	var sender = getAccountIdFromPublicKey(bytes.slice(8, 8+32));
+	var r = new NxtAddress();
+	r.set(byteArrayToBigInteger(bytes.slice(40, 8)).toString());
+	var recipient = r.toString();
+	var amount = byteArrayToBigInteger(bytes.slice(48, 48+8));
+	var fee = byteArrayToBigInteger(bytes.slice(56, 56+8));
+	var flags = converters.byteArrayToSignedInt32(bytes.slice(160, 160+4));
 	if(type == 0)
 	{
-		if(subtype == 0) typeName = "Ordinary Payment";
+		if(subtype == 0)
+		{
+			typeName = "Ordinary Payment";
+			setReview(1, "Type", typeName);
+			setReview(2, "Sender", sender);
+			setReview(3, "Recipient", recipient);
+			setReview(4, "Amount", amount/100000000 + " nxt");
+			setReview(5, "Fee", fee/100000000 + " nxt");
+		}
 	}
 	else if(type == 1)
 	{
-		if(subtype == 0) typeName = "Arbitrary Message";
+		if(subtype == 0)
+		{
+			typeName = "Arbitrary Message";
+			setReview(1, "Type", typeName);
+			setReview(2, "Sender", sender);
+			setReview(3, "Recipient", recipient);
+			setReview(4, "Fee", fee/100000000 + " nxt");
+		}
 		else if(subtype == 1) typeName = "Alias Assignment";
+		{
+			
+		}
 		else if(subtype == 2) typeName = "Poll Creation";
 		else if(subtype == 3) typeName = "Vote Casting";
 		else if(subtype == 4) typeName = "Hub Announcement";
@@ -768,8 +794,14 @@ function extractBytesData(bytes)
 	{
 		if(subtype == 0) typeName = "Balance Leasing";
 	}
-	
+
 	$("#modal_review").modal("show");
+}
+
+function setReview(number, key, value)
+{
+	$("#modal_review_key_"+number).text(key);
+	$("#modal_review_value_"+number).text(value);
 }
 
 
