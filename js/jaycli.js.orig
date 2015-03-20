@@ -762,7 +762,9 @@ function extractBytesData(bytes)
 		}
 		else if(subtype == 1) 
 		{
-		else if(subtype == 1) typeName = "Alias Assignment";
+			typeName = "Alias Assignment";
+<<<<<<< HEAD
+=======
 			setReview(1, "Type", typeName);
 			setReview(2, "Registrar", sender);
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
@@ -773,7 +775,7 @@ function extractBytesData(bytes)
 		}
 		else if(subtype == 2)
 		{
-			
+			typeName = "Poll Creation";
 		}
 		else if(subtype == 3) 
 		{
@@ -801,6 +803,7 @@ function extractBytesData(bytes)
 		else if(subtype == 7) 
 		{
 			typeName = "Alias Buy";
+>>>>>>> b4b2074d395b9981c6e3c19cc716d34cc35584ce
 		}
 	}
 	else if(type == 2)
