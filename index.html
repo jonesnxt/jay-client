@@ -151,7 +151,7 @@
 	<ul id="popout_tabs" class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
 		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
-		<li role="presentation"><a href="#decrypt" aria-controls="decrypt" role="tab" data-toggle="tab">Decrypt</a></li>
+		<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>
 		<li role="presentation"><a href="#accounts" aria-controls="accounts" role="tab" data-toggle="tab">Accounts</a></li>
 
 	</ul>
@@ -202,31 +202,47 @@
 						<input id="token_data" type="text" class="form-control"/>
 						<span class="help-block"></span>
 					</div><br/>
-					<button id="token_create" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="token" data-target="#modal_enter_pin">Create</button>
+					<div id="token_button_group" class="btn-group btn-group-justified" role="group">
+						<div class="btn-group" role="group">
+							<button id="token_create" type="button" class="btn btn-primary" data-toggle="modal" data-source="token" data-target="#modal_token_verify">Verify Token</button>
+						</div>
+						<div class="btn-group" role="group">
+							<button id="token_create" type="button" class="btn btn-primary" data-toggle="modal" data-source="token" data-target="#modal_enter_pin">Create Token</button>
+						</div>
+					</div>
 				</form>
 			</div>
 		</div>
-		<div role="tabpanel" class="tab-pane" id="decrypt">
+		<div role="tabpanel" class="tab-pane" id="message">
 			<div class="container-fluid">
-				<form id="token_form">
+				<form id="message_form">
 					<div class="form-group">
-						<label for="decrypt_account" class="control-label">Account</label>
+						<label for="message_account" class="control-label">Account</label>
 						<div class="row">
 							<div class="col-xs-10" style="margin-right: 0; padding-right: 3px">
-								<select data-source="token" id="decrypt_account" class="form-control account_selector">
+								<select data-source="token" id="message_account" class="form-control account_selector">
 								</select>
 							</div>
 							<div class="col-xs-2" style="margin-left: 0; padding-left: 3px">
-								<button id="token_account_info" type="button" data-toggle="modal" data-target="#modal_accounts_info" data-source="decrypt" class="btn btn-default">Info</button>
+								<button id="message_account_info" type="button" data-toggle="modal" data-target="#modal_accounts_info" data-source="message" class="btn btn-default">Info</button>
 							</div>
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="decrypt_data" class="control-label">Data To Decrypt</label>
-						<input id="decrypt_data" type="text" class="form-control"/>
-						<span class="help-block"></span>
+						<label for="message_data" class="control-label">Message</label>
+						<input id="message_data" type="text" class="form-control"/>
+						<span class="help-block">Encrypt or unencrypt message data.</span>
 					</div><br/>
-					<button id="decrypt_decrypt" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="decrypt" data-target="#modal_enter_pin">Decrypt</button>
+
+					<div id="message_button_group" class="btn-group btn-group-justified" role="group">
+						<div class="btn-group" role="group">
+							<button id="message_decrypt" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="decrypt" data-target="#modal_enter_pin">Decrypt</button>
+						</div>
+						<div class="btn-group" role="group">
+							<button id="message_encrypt" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="encrypt" data-target="#modal_enter_pin">Encrypt</button>
+						</div>
+					</div>
+
 				</form>
 			</div>
 		</div>

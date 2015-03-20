@@ -759,9 +759,9 @@ function extractBytesData(bytes)
 			setReview(3, "Recipient", recipient);
 			setReview(4, "Fee", fee/100000000 + " nxt");
 		}
-		else if(subtype == 1) typeName = "Alias Assignment";
+		else if(subtype == 1) 
 		{
-			
+			typeName = "Alias Assignment";
 		}
 		else if(subtype == 2) typeName = "Poll Creation";
 		else if(subtype == 3) typeName = "Vote Casting";
