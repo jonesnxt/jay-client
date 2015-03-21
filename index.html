@@ -5,6 +5,53 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9" />
 <title>Jay Client</title>
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css"/>
+<script src="js/jquery.js" type="text/javascript"></script>
+<script src="js/bootstrap.js" type="text/javascript"></script>
+<script src="js/jsbn.js" type="text/javascript"></script>
+<script src="js/converters.js" type="text/javascript"></script>
+<script src="js/curve25519.js" type="text/javascript"></script>
+<script src="js/jssha256.js" type="text/javascript"></script>
+<script src="js/nxtaddress.js" type="text/javascript"></script>
+<script src="js/aes.js" type="text/javascript"></script>
+<script src="js/jaycli.js" type="text/javascript"></script>
+<script>
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}   
+
+
+$("document").ready(function() {
+	$(".buttonc").click( function() {
+		window.open("index.html?popout=true", "_blank", "width=400, height=300")
+
+
+	});
+	if(getUrlParameter("popout") == "true")
+	{
+		$("#basepage").hide();
+		$("#popout").show();
+		popoutOpen();
+	}
+	else
+	{
+		$("#basepage").show();
+		$("#popout").hide();
+	}
+});
+
+//storeAccount(newAccount("1234"));
+</script>
 
 </head>
 
@@ -232,7 +279,7 @@
 						<label for="message_data" class="control-label">Message</label>
 						<input id="message_data" type="text" class="form-control"/>
 						<span class="help-block">Encrypt or unencrypt message data.</span>
-					</div><br/>
+					</div>
 
 					<div id="message_button_group" class="btn-group btn-group-justified" role="group">
 						<div class="btn-group" role="group">
@@ -625,11 +672,11 @@
 <div class="modal fade" id="modal_review" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
-      		<div class="modal-header">
+      		<div class="modal-header" style="padding:6px;margin:6px;">
        			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         		<h4 class="modal-title" id="modal_review_title">Transaction Review</h4>
       		</div>
-      		<div class="modal-body" style="padding-top:6px;margin-top:0;">
+      		<div class="modal-body" style="padding-top:6px;margin-top:0;padding-bottom:0,margin-bottom:0;">
       			<div class="row">
 	      			<div class="col-xs-6">
 	      				<dl class="dl-horizontal" style="padding-top:0;margin-top:0;padding-bottom:0;margin-bottom:2px;">
@@ -653,7 +700,7 @@
 	      			</div>
 	      		</div>
       		</div>
-      		<div class="modal-footer">
+      		<div class="modal-footer" style="padding:6px;margin:6px;">
         		<button type="button" class="btn btn-sm btn-default" id="modal_review_cancel" data-dismiss="modal">Cancel</button>
         		<button type="button" class="btn btn-sm btn-primary" id="modal_review_continue">Continue</button>
 			</div>
@@ -661,7 +708,28 @@
   	</div>
 </div>
 
+<div class="modal fade" id="modal_signed" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+      		<div class="modal-header">
+       			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        		<h4 class="modal-title" id="modal_signed_title">Broadcast Transaction</h4>
+      		</div>
+      		<div class="modal-body">
+      			<div class="form-group" style="margin-bottom:0;padding-bottom:0;">
+      				<label for="modal_signed_box" class="control-label">Signed Transaction</label>
+					<textarea id="modal_signed_box" rows="4" type="text" class="form-control input-sm" readonly></textarea>
+					<span class="help-text"></span>
+      			</div>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" id="modal_signed_close" data-dismiss="modal">Close</button>
+        		<button type="button" class="btn btn-primary" id="modal_backup_broadcast">Broadcast</button>
 
+			</div>
+		</div>
+  	</div>
+</div>
 
 
 <div class="modal fade" id="qrbig" tabindex="-1" role="dialog" aria-labelledby="qrbigLabel" aria-hidden="true">
@@ -680,55 +748,6 @@
     </div>
   </div>
 </div>
-
-
-<script src="js/jquery.js" type="text/javascript"></script>
-<script src="js/bootstrap.js" type="text/javascript"></script>
-<script src="js/jsbn.js" type="text/javascript"></script>
-<script src="js/converters.js" type="text/javascript"></script>
-<script src="js/curve25519.js" type="text/javascript"></script>
-<script src="js/jssha256.js" type="text/javascript"></script>
-<script src="js/nxtaddress.js" type="text/javascript"></script>
-<script src="js/aes.js" type="text/javascript"></script>
-<script src="js/jaycli.js" type="text/javascript"></script>
-<script>
-
-function getUrlParameter(sParam)
-{
-    var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++) 
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam) 
-        {
-            return sParameterName[1];
-        }
-    }
-}   
-
-
-$("document").ready(function() {
-	$(".buttonc").click( function() {
-		window.open("index.html?popout=true", "_blank", "width=400, height=300")
-
-
-	});
-	if(getUrlParameter("popout") == "true")
-	{
-		$("#basepage").hide();
-		$("#popout").show();
-		popoutOpen();
-	}
-	else
-	{
-		$("#basepage").show();
-		$("#popout").hide();
-	}
-});
-
-//storeAccount(newAccount("1234"));
-</script>
 
 </body>
 </html>

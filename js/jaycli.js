@@ -245,8 +245,8 @@ function pad(length, val) {
     return array;
 }
 // 48 -> 57
-// 97 -> 122
 // 65 -> 90
+// 97 -> 122
 
 	/**
 	 * Encoders and decoders for base-62 formatted data. Uses the alphabet 0..9 a..z
@@ -257,17 +257,17 @@ function pad(length, val) {
 
 	  function valueForByte(key) {
 	  	var p = key;
-		if(p > 48 && p < 57)
+		if(p >= 48 && p <= 57)
 		{
 			return p - 48;
 		}
-		else if(p > 97 && p < 122)
+		else if(p >= 65 && p <= 90)
 		{
-			return p - 97 + 10;
+			return p - 65 + 10;
 		}
-		else if(p > 65 && p < 90)
+		else if(p >= 97 && p <= 122)
 		{
-			return p - 65 + 10 + 26;
+			return p - 97 + 10 + 26;
 		}
 	    new Error("base62 digit not found");
 	    return -1;
@@ -421,7 +421,7 @@ function addAccountOption(option)
 	}
 	$("#transact_account").append("<option>"+option+"</option>");
 	$("#token_account").append("<option>"+option+"</option>");
-	$("#decrypt_account").append("<option>"+option+"</option>");
+	$("#message_account").append("<option>"+option+"</option>");
 	$("#accounts_account").append("<option>"+option+"</option>");
 }
 
@@ -429,7 +429,7 @@ function clearAccountOptions()
 {
 	$("#transact_account").html("");
 	$("#token_account").html("");
-	$("#decrypt_account").html("");
+	$("#message_account").html("");
 	$("#accounts_account").html("");
 }
 
@@ -466,6 +466,10 @@ function pinHandler(source, pin)
 	else if(source == "quicksend")
 	{
 		quicksendHandler(pin);
+	}
+	else if(source == "review")
+	{
+		reviewHandler(pin);
 	}
 
 }
@@ -656,18 +660,21 @@ function startQuicksend(sender, recipient, pub)
 /*255 here..
 "TX_" + 
 Base62(
-1 byte TRF ver.
+1 byte TRF ver. (01)
 1 byte type
 1 byte version/subtype
 8 bytes recipient/genesis
 8 bytes amount
 8 bytes fee
-2 bytes flags
+4 bytes flags
 attachment
 appendages)
 
 29 bytes normal tx...
 */
+
+// 0100101234123412341234010000000000000000e1f5050000000000000000
+// TX_3YoYmaTiHaxe7ApnLdGRJWnLUnmbB4r9lSsr5pudM
 
 function currentNxtTime()
 {
@@ -687,10 +694,11 @@ function positiveByteArray(byteArray)
 function startTRF(sender, trfBytes)
 {
 	var bytes = base62Decode(trfBytes.substring(3));
-	if(bytes[0] == '255')
+	if(bytes[0] == '1')
 	{
+		bytes = bytes.slice(1);
 		var collect = [];
-		collect = bytes[0].concat(bytes[1]); // type ver & subtype
+		collect = [bytes[0],bytes[1]]; // type ver & subtype
 		collect = collect.concat(nxtTimeBytes()); // timestamp
 		collect = collect.concat(wordBytes(1440)); // deadline
 		var senderPubKey = converters.hexStringToByteArray(findAccount(sender).publicKey);
@@ -700,10 +708,10 @@ function startTRF(sender, trfBytes)
 		collect = collect.concat(bytes.slice(18, 18+8)); // fee
 		collect = collect.concat(pad(32, 0)); // reftxhash
 		collect = collect.concat(pad(64, 0)); // signature bytes
-		collect = collect.concat(bytes.slice(26, 26+2)); // flags
+		collect = collect.concat(bytes.slice(26, 26+4)); // flags
 		collect = collect.concat(pad(4, 0)); // EC blockheight
 		collect = collect.concat(pad(8, 0)); // EC blockid
-		if(bytes.length < 28) collect = collect.concat(bytes.slice(28)); // attachment/appendages
+		if(bytes.length < 30) collect = collect.concat(bytes.slice(30)); // attachment/appendages
 		startHex(converters.byteArrayToHexString(collect));
 	}
 
@@ -719,6 +727,17 @@ function startHex(hex)
 	extractBytesData(bytes);
 }
 
+function clearReview()
+{
+	setReview(1, "", "");
+	setReview(2, "", "");
+	setReview(3, "", "");
+	setReview(4, "", "");
+	setReview(5, "", "");
+	setReview(6, "", "");
+
+}
+
 function extractBytesData(bytes)
 {
 	// lets think here.
@@ -727,17 +746,21 @@ function extractBytesData(bytes)
 	// appendages will have dropdowns with their content and won't take up much room.
 	// the 8 zones will need to be really small.
 	// type sender amount recip extra for attachment...
+	clearReview();
+
 	$("#modal_review").data("bytes", bytes);
 	var type = bytes[0];
-	var subtype = bytes[1] << 8;
-	var sender = getAccountIdFromPublicKey(bytes.slice(8, 8+32));
+	var subtype = bytes[1] >> 8;
+	var sender = getAccountIdFromPublicKey(converters.byteArrayToHexString(bytes.slice(8, 8+32)), true);
 	var r = new NxtAddress();
 	r.set(byteArrayToBigInteger(bytes.slice(40, 8)).toString());
 	var recipient = r.toString();
 	var amount = byteArrayToBigInteger(bytes.slice(48, 48+8));
 	var fee = byteArrayToBigInteger(bytes.slice(56, 56+8));
 	var flags = converters.byteArrayToSignedInt32(bytes.slice(160, 160+4));
+	rest = [];
 	if(bytes.length > 176) var rest = bytes.slice(176);
+	var msg = [];
 	if(type == 0)
 	{
 		if(subtype == 0)
@@ -748,6 +771,7 @@ function extractBytesData(bytes)
 			setReview(3, "Recipient", recipient);
 			setReview(4, "Amount", amount/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length) msg = rest;
 		}
 	}
 	else if(type == 1)
@@ -759,10 +783,11 @@ function extractBytesData(bytes)
 			setReview(2, "Sender", sender);
 			setReview(3, "Recipient", recipient);
 			setReview(4, "Fee", fee/100000000 + " nxt");
+			if(rest.length) msg = rest;
 		}
 		else if(subtype == 1) 
 		{
-		else if(subtype == 1) typeName = "Alias Assignment";
+			typeName = "Alias Assignment";
 			setReview(1, "Type", typeName);
 			setReview(2, "Registrar", sender);
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
@@ -770,10 +795,11 @@ function extractBytesData(bytes)
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			var data = converters.byteArrayToString(rest.slice(2+rest[1], 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
 			setReview(5, "Data", data);
+			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
 		}
 		else if(subtype == 2)
 		{
-			
+			typeName = "Poll Creation";
 		}
 		else if(subtype == 3) 
 		{
@@ -793,6 +819,7 @@ function extractBytesData(bytes)
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			var data = converters.byteArrayToString(rest.slice(2+rest[1], 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
 			setReview(5, "Description", data);
+			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
 		}
 		else if(subtype == 6) 
 		{
@@ -806,26 +833,199 @@ function extractBytesData(bytes)
 	else if(type == 2)
 	{
 		if(subtype == 0) typeName = "Asset Issuance";
-		else if(subtype == 1) typeName = "Asset Transfer";
-		else if(subtype == 2) typeName = "Ask Order Placement";
-		else if(subtype == 3) typeName = "Bid Order Placement";
-		else if(subtype == 4) typeName = "Ask Order Cancellation";
-		else if(subtype == 5) typeName = "Bid Order Cancellation";
+		else if(subtype == 1) 
+		{
+			typeName = "Asset Transfer";
+			setReview(1, "Type", typeName);
+			setReview(2, "Sender", sender);
+			setReview(3, "Recipient", recipient);
+			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(4, "Asset Id", assetId);
+			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			setReview(5, "Amount", amount + " QNT");
+			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 17) msg = rest;
+		}
+		else if(subtype == 2) 
+		{
+			typeName = "Ask Order Placement";
+			setReview(1, "Type", typeName);
+			setReview(2, "Trader", sender);
+			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(3, "Asset Id", assetId);
+			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			setReview(4, "Amount", amount + " QNT");
+			var price = converters.byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString;
+			setReview(5, "Price", price/100000000 + " nxt");
+			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 25) msg = rest;
+		}
+		else if(subtype == 3) 
+		{
+			typeName = "Bid Order Placement";
+			setReview(1, "Type", typeName);
+			setReview(2, "Trader", sender);
+			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(3, "Asset Id", assetId);
+			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			setReview(4, "Amount", amount + " QNT");
+			var price = converters.byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString;
+			setReview(5, "Price", price/100000000 + " nxt");
+			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 25) msg = rest;
+		}
+		else if(subtype == 4) 
+		{
+			typeName = "Ask Order Cancellation";
+			setReview(1, "Type", typeName);
+			setReview(2, "Trader", sender);
+			var order = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(3, "Order Id", order);
+			setReview(4, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 9) msg = rest;
+		}
+		else if(subtype == 5)
+		{
+			typeName = "Bid Order Cancellation";
+			setReview(1, "Type", typeName);
+			setReview(2, "Trader", sender);
+			var order = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(3, "Order Id", order);
+			setReview(4, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 9) msg = rest;
+		}
 	}
 	else if(type == 3)
 	{
-		if(subtype == 0) typeName = "Goods Listing";
-		else if(subtype == 1) typeName = "Goods Delisting";
-		else if(subtype == 2) typeName = "Price Change";
-		else if(subtype == 3) typeName = "Quantity Change";
-		else if(subtype == 4) typeName = "Purchase";
-		else if(subtype == 5) typeName = "Delivery";
-		else if(subtype == 6) typeName = "Feedback";
-		else if(subtype == 7) typeName = "Refund";
+		if(subtype == 0) 
+		{
+			typeName = "Goods Listing";
+		}
+		else if(subtype == 1) 
+		{
+			typeName = "Goods Delisting";
+		}
+		else if(subtype == 2) 
+		{
+			typeName = "Price Change";
+		}
+		else if(subtype == 3) 
+		{
+			typeName = "Quantity Change";
+			setReview(1, "Type", typeName);
+			setReview(2, "Seller", sender);
+			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Item Id", goodid);
+			var chg = converters.byteArrayToSignedInt32(rest.slice(1+8, 1+8+4));
+			if(chg < 0) setReview(4, "Decrease By", -qnt);
+			else setReview(4, "Increase By", qnt);
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 1+8+4) msg = rest;
+		}
+		else if(subtype == 4)
+		{
+			typeName = "Purchase";
+			setReview(1, "Type", typeName);
+			setReview(2, "Buyer", sender);
+			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Item Id", goodid);
+			var qnt = converters.byteArrayToBigInteger(rest.slice(1+8, 1+8+4)).toString();
+			setReview(4, "Quantity", qnt);
+			var price = converters.byteArrayToBigInteger(rest.slice(1+8+4, 1+16+4)).toString();
+			setReview(5, "Price", price/100000000 + " nxt");
+			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 1+16+8) msg = rest;
+		}
+		else if(subtype == 5)
+		{
+			typeName = "Delivery";
+			setReview(1, "Type", typeName);
+			setReview(2, "Seller", sender);
+			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Item Id", goodid);
+			var discount = converters.byteArrayToBigInteger(rest.slice(rest.length-8)).toString();
+			setReview(4, "Discount", discount/100000000 + " nxt");
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 1+8) msg = rest;
+		
+		}
+		else if(subtype == 6) 
+		{
+			typeName = "Feedback";
+		}
+		else if(subtype == 7) 
+		{
+			typeName = "Refund";
+		}
 	}
 	else if(type == 4)
 	{
-		if(subtype == 0) typeName = "Balance Leasing";
+		if(subtype == 0)
+		{
+			typeName = "Balance Leasing";
+			setReview(1, "Type", typeName);
+			setReview(2, "Lessor", sender);
+			var lease = bytesWord(rest.slice(1,3));
+			setReview(3, "Length", lease + " blocks");
+			setReview(4, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 3) msg = rest;
+		} 
+	}
+	else if(type == 5)
+	{
+		if(subtype == 0)
+		{
+			typeName = "Issue Currency";
+		}
+		else if(subtype == 1)
+		{
+			typeName = "Reserve Increase";
+			setReview(1, "Type", typeName);
+			setReview(2, "Reserver", sender);
+			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(3, "Currency Id", assetId);
+			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			setReview(4, "Amount per Unit", amount + " nxt");
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 17) msg = rest;
+		}
+		else if(subtype == 2)
+		{
+			typeName = "Reserve Claim";
+		}
+		else if(subtype == 3)
+		{
+			typeName = "Currency Transfer";
+			setReview(1, "Type", typeName);
+			setReview(2, "Sender", sender);
+			setReview(3, "Recipient", recipient);
+			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			setReview(4, "Currency Id", assetId);
+			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			setReview(5, "Amount", amount + " QNT");
+			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 17) msg = rest;
+		}
+		else if(subtype == 4)
+		{
+			typeName = "Exchange Offer";
+		}
+		else if(subtype == 5)
+		{
+			typeName = "Exchange Buy";
+		}
+		else if(subtype == 6)
+		{
+			typeName = "Exchange Sell";
+		}
+		else if(subtype == 7)
+		{
+			typeName = "Mint Currency";
+		}
+		else if(subtype == 8)
+		{
+			typeName = "Delete Currency";
+		}
 	}
 
 	$("#modal_review").modal("show");
@@ -950,6 +1150,29 @@ function infoModal(message)
 	$("#modal_basic_info_title").text(message);
 }
 
+function reviewHandler(pin)
+{
+	var bytes = $("#modal_enter_pin").data("bytes");
+	$("#modal_enter_pin").removeAttr("data-bytes");
+	var address = $("#accounts_account option:selected").text();
+	account = findAccount(address);
+	var secretPhrase = decryptSecretPhrase(account.cipher, pin, account.checksum);
+	if(secretPhrase === false)
+	{
+		// incorrect
+		infoModal("Incorrect PIN");
+	}
+	else
+	{
+		var sig = signBytes(bytes, secretPhrase);
+		var signed = bytes.slice(0,96);
+		signed = signed.concat(sig);
+		signed = signed.concat(96+64);
+		$("#modal_signed_box").val(converters.byteArrayToHexString(signed));
+		$("#modal_signed").modal("show");
+	}
+}
+
 
 function findAccount(address)
 {
@@ -1003,6 +1226,10 @@ $("document").ready(function() {
 		else if(source == "quicksend")
 		{
 			$("#modal_enter_pin_title").text("Enter PIN to Quicksend");
+		}
+		else if(source == "review")
+		{
+			$("#modal_enter_pin_title").text("Enter PIN to Sign Transaction");
 		}
 		$("#modal_enter_pin_accept").data("source", source);
 	});
@@ -1121,6 +1348,14 @@ $("document").ready(function() {
 		$("#modal_enter_pin").data("amount", amount);
 		$("#modal_enter_pin").data("sender", sender);
 		$("#modal_enter_pin").data("recipient", recipient);
+		$("#modal_enter_pin").modal("show");
+	})
+
+	$("#modal_review_continue").click(function() {
+		var bytes = $("#modal_review").data("bytes");
+		$("#modal_review").modal("hide");
+		$("#modal_enter_pin").data("source", "review");
+		$("#modal_enter_pin").data("bytes", bytes);
 		$("#modal_enter_pin").modal("show");
 	})
 
