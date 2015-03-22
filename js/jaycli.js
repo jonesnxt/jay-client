@@ -246,6 +246,30 @@ function pad(length, val) {
     }
     return array;
 }
+
+function timeago(timestamp)
+{
+	var fromnow =  currentNxtTime() - timestamp;
+		
+	var days =  Math.floor(fromnow/86400);
+	var hours = Math.floor((fromnow%86400)/3600);
+	var minutes = Math.floor((fromnow%3600)/60);
+	var seconds = Math.floor(fromnow&60);
+	var acc = "";
+	if(days != 0 && days != 1) acc = days + " days ago";
+	else if(days == 1) acc = " 1 day ago";
+	else if(hours != 0 && hours != 1) acc = hours + " hours ago";
+	else if(hours == 1) acc = "1 hour ago";
+	else if(minutes != 0 && minutes != 1) acc = minutes + " minutes ago";
+	else if(minutes == 1) acc = "1 minute ago";
+	else if(seconds != 0 && seconds != 1) acc = seconds + " seconds ago";
+	else if(seconds == 1) acc = "1 second ago";
+	else acc = "just now";
+		
+	return acc;
+}
+
+
 // 48 -> 57
 // 65 -> 90
 // 97 -> 122
@@ -435,9 +459,9 @@ function clearAccountOptions()
 	$("#accounts_account").html("");
 }
 
-function broadcastTransaction(nd)
+function broadcastTransaction(nd, bytes)
 {
-	var params = {requestType: "broadcastTransaction", transactionBytes: $("#modal_signed_box").val()};
+	var params = {requestType: "broadcastTransaction", transactionBytes: bytes};
 	$.ajax(nd, {
 		url: nd,
 		data: params,
@@ -451,9 +475,10 @@ function broadcastTransaction(nd)
 function transactionBroadcasted(resp, state)
 {
 	var response = JSON.parse(resp);
-	alert(response.transaction);
+	alert(resp);
 	alert(state);
 	$("#modal_signed").modal("hide");
+	$("#modal_quick_sure").modal("hide");
 	if(state != "success")
 	{
 		infoModal("Couldn't reach server");
@@ -462,14 +487,20 @@ function transactionBroadcasted(resp, state)
 	{
 		$("#modal_tx_response_title").text("Transaction Error");
 		$("#modal_tx_response_key_1").text("Error Code");
-		$("#modal_tx_response_value_2").text(response.errorCode);
+		$("#modal_tx_response_value_1").text(response.errorCode);
 		$("#modal_tx_response_key_2").text("Error Description");
-		$("#modal_tx_response_value_2").text(response.errorDescription);
+		$("#modal_tx_response_value_2").text(response.errorDescription); 
+		$("#modal_tx_response").modal("show");
 
 	}
 	if(response.transaction != undefined)
 	{
 		$("#modal_tx_response_title").text("Transaction Successful");
+		$("#modal_tx_response_key_1").text("Transaction Id");
+		$("#modal_tx_response_value_1").text(response.transaction);
+		$("#modal_tx_response_key_2").text("Full Hash");
+		$("#modal_tx_response_value_2").text(response.fullHash);
+		$("#modal_tx_response").modal("show");
 	}
 }
 
@@ -1170,7 +1201,7 @@ function createQuicksend(recipient, amount, secretPhrase)
 
 	signable = txbytes.slice(0, 96);
 	signable = signable.concat(sig);
-	signable = txbytes.slice(96+64);
+	signable = signable.concat(txbytes.slice(96+64));
 
 	// now we have a full tx...
 	return signable;
@@ -1212,6 +1243,47 @@ function reviewHandler(pin)
 		signed = signed.concat(bytes.slice(96+64));
 		$("#modal_signed_box").val(converters.byteArrayToHexString(signed));
 		$("#modal_signed").modal("show");
+	}
+}
+
+function verifyToken()
+{
+	var token = $("#modal_verify_token_token").val();
+	var websiteString = $("#token_data").val();
+	var resp = parseToken(token, websiteString);
+
+	if(token.length == 160)
+	{
+		if(resp.isValid)
+		{
+			$("#modal_verify_token_group").removeClass("has-error");
+			$("#modal_verify_token_group").addClass("has-success");
+			$("#modal_verify_token_insert").text("(valid)");
+		}
+		else
+		{
+			$("#modal_verify_token_group").addClass("has-error");
+			$("#modal_verify_token_group").removeClass("has-success");
+			$("#modal_verify_token_insert").text("(invalid)");
+		}
+		$("#modal_verify_token_address").text(getAccountIdFromPublicKey(resp.publicKey, true));
+		$("#modal_verify_token_timestamp").text(timeago(resp.timestamp));
+	}
+	else if(token.length == 0)
+	{
+		$("#modal_verify_token_group").removeClass("has-error");
+		$("#modal_verify_token_group").removeClass("has-success");
+		$("#modal_verify_token_insert").text("");	
+		$("#modal_verify_token_address").text("N/A");
+		$("#modal_verify_token_timestamp").text("N/A");
+	}
+	else
+	{
+		$("#modal_verify_token_group").addClass("has-error");
+		$("#modal_verify_token_group").removeClass("has-success");
+		$("#modal_verify_token_insert").text("(invalid)");	
+		$("#modal_verify_token_address").text("Token Length Incorrect");
+		$("#modal_verify_token_timestamp").text("N/A");
 	}
 }
 
@@ -1402,7 +1474,19 @@ $("document").ready(function() {
 	})
 
 	$("#modal_signed_broadcast").click(function() {
-		broadcastTransaction(NODE);
+		broadcastTransaction(NODE, $("#modal_signed_box").val());
 	});
+
+	$("#modal_quick_sure_send").click(function() {
+		broadcastTransaction(NODE, $("#modal_quick_sure").data("tx"));
+	})
+
+	$("#modal_verify_token").on("show.bs.modal", function() {
+		verifyToken();
+	})
+
+	$("#modal_verify_token_token").on("input propertychange", function() {
+		verifyToken();
+	})
 
 }) 
