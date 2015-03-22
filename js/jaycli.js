@@ -1,3 +1,5 @@
+var NODE = "http://jnxt.org:6876/nxt"
+
 var _hash = {
 		init: SHA256_init,
 		update: SHA256_write,
@@ -433,6 +435,44 @@ function clearAccountOptions()
 	$("#accounts_account").html("");
 }
 
+function broadcastTransaction(nd)
+{
+	var params = {requestType: "broadcastTransaction", transactionBytes: $("#modal_signed_box").val()};
+	$.ajax(nd, {
+		url: nd,
+		data: params,
+		type: "POST",
+		success: transactionBroadcasted,
+		timeout: 2000,
+		fail: transactionBroadcasted
+	});
+}
+
+function transactionBroadcasted(resp, state)
+{
+	var response = JSON.parse(resp);
+	alert(response.transaction);
+	alert(state);
+	$("#modal_signed").modal("hide");
+	if(state != "success")
+	{
+		infoModal("Couldn't reach server");
+	}
+	if(response.errorCode != undefined)
+	{
+		$("#modal_tx_response_title").text("Transaction Error");
+		$("#modal_tx_response_key_1").text("Error Code");
+		$("#modal_tx_response_value_2").text(response.errorCode);
+		$("#modal_tx_response_key_2").text("Error Description");
+		$("#modal_tx_response_value_2").text(response.errorDescription);
+
+	}
+	if(response.transaction != undefined)
+	{
+		$("#modal_tx_response_title").text("Transaction Successful");
+	}
+}
+
 function pinHandler(source, pin)
 {
 	if(source == "accounts_new")
@@ -697,6 +737,8 @@ function startTRF(sender, trfBytes)
 	if(bytes[0] == '1')
 	{
 		bytes = bytes.slice(1);
+		if(bytes.length == 31) bytes = bytes.slice(0, 30);
+
 		var collect = [];
 		collect = [bytes[0],bytes[1]]; // type ver & subtype
 		collect = collect.concat(nxtTimeBytes()); // timestamp
@@ -748,12 +790,12 @@ function extractBytesData(bytes)
 	// type sender amount recip extra for attachment...
 	clearReview();
 
-	$("#modal_review").data("bytes", bytes);
+	$("#modal_review").data("bytes", converters.byteArrayToHexString(bytes));
 	var type = bytes[0];
 	var subtype = bytes[1] >> 8;
 	var sender = getAccountIdFromPublicKey(converters.byteArrayToHexString(bytes.slice(8, 8+32)), true);
 	var r = new NxtAddress();
-	r.set(byteArrayToBigInteger(bytes.slice(40, 8)).toString());
+	r.set(byteArrayToBigInteger(bytes.slice(40, 48)).toString());
 	var recipient = r.toString();
 	var amount = byteArrayToBigInteger(bytes.slice(48, 48+8));
 	var fee = byteArrayToBigInteger(bytes.slice(56, 56+8));
@@ -1152,7 +1194,7 @@ function infoModal(message)
 
 function reviewHandler(pin)
 {
-	var bytes = $("#modal_enter_pin").data("bytes");
+	var bytes = converters.hexStringToByteArray($("#modal_enter_pin").data("bytes"));
 	$("#modal_enter_pin").removeAttr("data-bytes");
 	var address = $("#accounts_account option:selected").text();
 	account = findAccount(address);
@@ -1167,7 +1209,7 @@ function reviewHandler(pin)
 		var sig = signBytes(bytes, secretPhrase);
 		var signed = bytes.slice(0,96);
 		signed = signed.concat(sig);
-		signed = signed.concat(96+64);
+		signed = signed.concat(bytes.slice(96+64));
 		$("#modal_signed_box").val(converters.byteArrayToHexString(signed));
 		$("#modal_signed").modal("show");
 	}
@@ -1358,5 +1400,9 @@ $("document").ready(function() {
 		$("#modal_enter_pin").data("bytes", bytes);
 		$("#modal_enter_pin").modal("show");
 	})
+
+	$("#modal_signed_broadcast").click(function() {
+		broadcastTransaction(NODE);
+	});
 
 }) 
