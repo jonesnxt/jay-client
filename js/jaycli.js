@@ -801,7 +801,7 @@ function startTRF(sender, trfBytes)
 		collect = collect.concat(bytes.slice(26, 26+4)); // flags
 		collect = collect.concat(pad(4, 0)); // EC blockheight
 		collect = collect.concat(pad(8, 0)); // EC blockid
-		if(bytes.length < 30) collect = collect.concat(bytes.slice(30)); // attachment/appendages
+		if(bytes.length > 30) collect = collect.concat(bytes.slice(30)); // attachment/appendages
 		startHex(converters.byteArrayToHexString(collect));
 	}
 
@@ -840,7 +840,7 @@ function extractBytesData(bytes)
 
 	$("#modal_review").data("bytes", converters.byteArrayToHexString(bytes));
 	var type = bytes[0];
-	var subtype = bytes[1] >> 8;
+	var subtype = bytes[1] >> 4;
 	var sender = getAccountIdFromPublicKey(converters.byteArrayToHexString(bytes.slice(8, 8+32)), true);
 	var r = new NxtAddress();
 	r.set(byteArrayToBigInteger(bytes.slice(40, 48)).toString());
@@ -849,7 +849,7 @@ function extractBytesData(bytes)
 	var fee = byteArrayToBigInteger(bytes.slice(56, 56+8));
 	var flags = converters.byteArrayToSignedInt32(bytes.slice(160, 160+4));
 	rest = [];
-	if(bytes.length > 176) var rest = bytes.slice(176);
+	if(bytes.length > 176) rest = bytes.slice(176);
 	var msg = [];
 	if(type == 0)
 	{
@@ -883,7 +883,7 @@ function extractBytesData(bytes)
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
 			setReview(3, "Alias Name", alias);
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			var data = converters.byteArrayToString(rest.slice(2+rest[1], 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
+			var data = converters.byteArrayToString(rest.slice(2+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
 			setReview(5, "Data", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
 		}
@@ -907,7 +907,7 @@ function extractBytesData(bytes)
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
 			setReview(3, "Name", alias);
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			var data = converters.byteArrayToString(rest.slice(2+rest[1], 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
+			var data = converters.byteArrayToString(rest.slice(2+rest[1], 4+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
 			setReview(5, "Description", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
 		}
