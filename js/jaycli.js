@@ -1,4 +1,4 @@
-var NODE = "http://jnxt.org:6876/nxt"
+var DEFAULT_NODE = "jnxt.org";
 
 var _hash = {
 		init: SHA256_init,
@@ -408,6 +408,11 @@ var pendingAccount;
 
 function popoutOpen()
 {
+	if(localStorage["node"] == undefined)
+	{
+		localStorage["node"] = DEFAULT_NODE;
+		localStorage["isTestnet"] = false;
+	}
 	// ok lets deal with any popup setup thats needed.
 	if(!localStorage["accounts"] || JSON.parse(localStorage["accounts"]).length == 0)
 	{
@@ -502,6 +507,26 @@ function transactionBroadcasted(resp, state)
 		$("#modal_tx_response_value_2").text(response.fullHash);
 		$("#modal_tx_response").modal("show");
 	}
+}
+
+function setBroadcastNode(node, isTestnet)
+{
+	localStorage["node"] = node;
+	localStorage["isTestnet"] = (isTestnet === true);
+}
+
+function getBroadcastNode()
+{
+	var node = "http://";
+	if(localStorage["node"] == undefined)
+	{
+		node += DEFAULT_NODE;
+		localStorage["node"] = DEFAULT_NODE;
+	}
+	else node += localStorage["node"];
+	if(localStorage["isTestnet"]) node += ":6876";
+	else node += ":7876";
+	return node + "/nxt";
 }
 
 function pinHandler(source, pin)
@@ -729,23 +754,13 @@ function startQuicksend(sender, recipient, pub)
 }
 
 /*255 here..
-"TX_" + 
-Base62(
-1 byte TRF ver. (01)
-1 byte type
-1 byte version/subtype
-8 bytes recipient/genesis
-8 bytes amount
-8 bytes fee
-4 bytes flags
-attachment
-appendages)
+
 
 29 bytes normal tx...
 */
 
 // 0100101234123412341234010000000000000000e1f5050000000000000000
-// TX_3YoYmaTiHaxe7ApnLdGRJWnLUnmbB4r9lSsr5pudM
+// TX_3YoYmaTiHaxe7ApnLdGR JWnLUnmbB4r9lSsr5pudM
 
 function currentNxtTime()
 {
@@ -765,6 +780,8 @@ function positiveByteArray(byteArray)
 function startTRF(sender, trfBytes)
 {
 	var bytes = base62Decode(trfBytes.substring(3));
+	console.log(JSON.stringify(bytes));
+	console.log(JSON.stringify(bytes.length));
 	if(bytes[0] == '1')
 	{
 		bytes = bytes.slice(1);
@@ -1487,6 +1504,22 @@ $("document").ready(function() {
 
 	$("#modal_verify_token_token").on("input propertychange", function() {
 		verifyToken();
+	})
+
+	$("#modal_broadcast").on("show.bs.modal", function() {
+		var old = localStorage["node"];
+		if(localStorage["isTestnet"] == "true") old += " (testnet)";
+		else old += " (mainnet)";
+		$("#modal_broadcast_old").text(old);
+		$("#modal_broadcast_node").text("");
+		$("#modal_broadcast_testnet").removeAttr("checked");
+	})
+
+	$("#modal_broadcast_save").click(function() {
+		var node = $("#modal_broadcast_node").val();
+		var isTestnet = $("#modal_broadcast_testnet").is(":checked");
+		setBroadcastNode(node, isTestnet);
+		$("#modal_broadcast").modal("hide");
 	})
 
 }) 

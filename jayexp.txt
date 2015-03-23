@@ -1,0 +1,26 @@
+Jay at a glance (short and sweet)
+
+What?
+Jay is way to use Nxt web services safely and easily.
+
+How?
+A downloadable html file that handles all your security and acts as a buffer between your computer and potentially unsafe web services.
+
+Light
+No blockchain needed, just a 400 kb all-in-one html file.
+
+Secure
+Encrypts all password data with a PIN system.
+
+Fast
+Go from zero to all set up in a few minutes.
+
+Cross-platform
+Any computer with a modern web browser will work.
+
+Open
+Everything free and created with the MIT license.
+
+Extendable
+Basic Javascript is all thats needed to be a wallet developer.
+

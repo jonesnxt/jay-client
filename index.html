@@ -198,9 +198,9 @@ $("document").ready(function() {
 	<ul id="popout_tabs" class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
 		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
-		<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>
+		<!--<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>-->
 		<li role="presentation"><a href="#accounts" aria-controls="accounts" role="tab" data-toggle="tab">Accounts</a></li>
-
+		<li role="presentation"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">About</a></li>
 	</ul>
 	<br/>
 	<!-- Tab panes -->
@@ -349,8 +349,8 @@ $("document").ready(function() {
 
   					<dt>Created By</dt>
   					<dd id="info_created">Jones</dd>
-
-				</dl>
+				</dl><br/>
+				<button class="btn btn-primary btn-block" type="button" data-toggle="modal" data-source="broadcast" data-target="#modal_broadcast">Change Broadcast Node</button>
 			</div>
 		</div>
 	</div>
@@ -774,6 +774,34 @@ $("document").ready(function() {
       		</div>
       		<div class="modal-footer" style="padding:7px;margin:0;">
         		<button type="button" class="btn btn-sm btn-default" id="modal_tx_response_close" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+  	</div>
+</div>
+
+<div class="modal fade" id="modal_broadcast" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+      		<div class="modal-header">
+       			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        		<h4 class="modal-title" id="modal_broadcast_title">Change Broadcast Node</h4>
+      		</div>
+      		<div class="modal-body">
+				<dl  style="margin-bottom:0;padding-bottom:0;">
+	      			<dt>Old Broadcast Node</dt>
+	      			<dd id="modal_broadcast_old"></dd>
+	      		</dl>
+				<div class="form-group">
+  					<label class="control-label" for="modal_broadcast_node">Broadcast Node</label>
+  					<input type="text" class="form-control input-sm" id="modal_broadcast_node"/>
+				</div>
+				<label class="checkbox-inline" for="modal_broadcast_testnet">
+  					<input type="checkbox" id="modal_broadcast_testnet" value="true"> Use Testnet
+				</label>
+      		</div>
+      		<div class="modal-footer">
+      			<button type="button" class="btn btn-sm btn-default" id="modal_broadcast_close" data-dismiss="modal">Close</button>
+        		<button type="button" class="btn btn-sm btn-primary" id="modal_broadcast_save">Save</button>
 			</div>
 		</div>
   	</div>
