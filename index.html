@@ -32,6 +32,7 @@ function getUrlParameter(sParam)
 
 
 $("document").ready(function() {
+$('[data-toggle="tooltip"]').tooltip()
 $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 	$(".buttonc").click( function() {
@@ -200,9 +201,9 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 	<ul id="popout_tabs" class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
 		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
-		<!--<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>-->
-		<li role="presentation"><a href="#accounts" aria-controls="accounts" role="tab" data-toggle="tab">Accounts</a></li>
-		<li role="presentation"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">About</a></li>
+		<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>
+		<li role="presentation"><a href="#accounts" aria-controls="accounts" role="tab" data-toggle="tab">Account</a></li>
+		<li role="presentation"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">?</a></li>
 	</ul>
 	<br/>
 	<!-- Tab panes -->
@@ -223,10 +224,9 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="transact_transaction" class="control-label">Transaction</label>
+						<label for="transact_transaction" class="control-label"  data-toggle="tooltip" data-placement="right" title="TX_ format, Unsigned Tx Bytes, Nxt Address, or Public Key">Transaction</label>
 						<input id="transact_transaction" type="text" class="form-control"/>
-						<span class="help-block">TX_ format, Unsigned Tx Bytes, Nxt Address, or Public Key</span>
-					</div>
+					</div><br/>
 					<button id="transact_continue" type="button" class="btn btn-primary btn-block">Continue</button>
 				</form>
 			</div>
@@ -280,18 +280,8 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 					<div class="form-group">
 						<label for="message_data" class="control-label">Message</label>
 						<input id="message_data" type="text" class="form-control"/>
-						<span class="help-block">Encrypt or unencrypt message data.</span>
 					</div>
-
-					<div id="message_button_group" class="btn-group btn-group-justified" role="group">
-						<div class="btn-group" role="group">
-							<button id="message_decrypt" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="decrypt" data-target="#modal_enter_pin">Decrypt</button>
-						</div>
-						<div class="btn-group" role="group">
-							<button id="message_encrypt" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="encrypt" data-target="#modal_enter_pin">Encrypt</button>
-						</div>
-					</div>
-
+					<button id="message_decrypt" type="button" class="btn btn-primary btn-block">Unencrypt Message</button>
 				</form>
 			</div>
 		</div>

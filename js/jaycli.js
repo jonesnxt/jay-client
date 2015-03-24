@@ -408,7 +408,7 @@ var pendingAccount;
 
 function popoutOpen()
 {
-	if(localStorage["node"] == undefined)
+	if(!localStorage.hasOwnProperty("node"))
 	{
 		localStorage["node"] = DEFAULT_NODE;
 		localStorage["isTestnet"] = false;
@@ -1143,7 +1143,17 @@ function extractBytesData(bytes)
 		var str = converters.byteArrayToString(msg.slice(3,3+len));
 		alert(str);
 		$("#modal_review_message").attr("data-content", str);
+		str = str.slice(3+len);
 	}
+	else $("#modal_review_message").attr("disabled", "true");
+	if(publicKey && msg.length)
+	{
+		$("#modal_review_public_key").removeAttr("disabled");
+		var str = str.slice(1,65);
+		$("#modal_review_public_key").attr("data-content", str);
+		str = str.slice(65);
+	}
+	else $("#modal_review_public_key").attr("disabled","true");
 
 	// appendages... ugh... and no icons, how will I do this..
 
