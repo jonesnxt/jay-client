@@ -32,6 +32,8 @@ function getUrlParameter(sParam)
 
 
 $("document").ready(function() {
+$('[data-toggle="popover"]').popover({trigger:"hover"});
+
 	$(".buttonc").click( function() {
 		window.open("index.html?popout=true", "_blank", "width=400, height=300")
 
@@ -701,6 +703,10 @@ $("document").ready(function() {
 	      		</div>
       		</div>
       		<div class="modal-footer" style="padding:6px;margin:6px;">
+      			<button type="button" class="btn btn-default btn-sm pull-left" data-container="body" data-toggle="popover" data-placement="top" title="Message Data" disabled id="modal_review_message">Message
+				</button>
+				<button type="button" class="btn btn-default btn-sm pull-left" data-container="body" data-toggle="popover" data-placement="top" title="Public Key" disabled id="modal_review_public_key">Public Key
+				</button>
         		<button type="button" class="btn btn-sm btn-default" id="modal_review_cancel" data-dismiss="modal">Cancel</button>
         		<button type="button" class="btn btn-sm btn-primary" id="modal_review_continue">Continue</button>
 			</div>

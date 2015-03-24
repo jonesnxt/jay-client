@@ -889,11 +889,11 @@ function extractBytesData(bytes)
 		}
 		else if(subtype == 2)
 		{
-			typeName = "Poll Creation";
+			typeName = "Poll Creation"; //  not yet
 		}
 		else if(subtype == 3) 
 		{
-			typeName = "Vote Casting";
+			typeName = "Vote Casting"; // not yet
 		}
 		else if(subtype == 4)
 		{
@@ -998,6 +998,14 @@ function extractBytesData(bytes)
 		else if(subtype == 2) 
 		{
 			typeName = "Price Change";
+			setReview(1, "Type", typeName);
+			setReview(2, "Seller", sender);
+			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Item Id", goodid);
+			var newprice = converters.byteArrayToBigInteger(rest.slice(1+8, 1+8+8));
+			setReview(4, "New Price", qnt/100000000 + " nxt");
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 1+8+8) msg = rest;
 		}
 		else if(subtype == 3) 
 		{
@@ -1089,7 +1097,7 @@ function extractBytesData(bytes)
 			setReview(1, "Type", typeName);
 			setReview(2, "Sender", sender);
 			setReview(3, "Recipient", recipient);
-			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			var assetid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(4, "Currency Id", assetId);
 			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(5, "Amount", amount + " QNT");
@@ -1111,6 +1119,14 @@ function extractBytesData(bytes)
 		else if(subtype == 7)
 		{
 			typeName = "Mint Currency";
+			setReview(1, "Type", typeName);
+			setReview(2, "Minter", sender);
+			var assetid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Currency Id", assetId);
+			var amount = converters.byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString();
+			setReview(4, "Amount To Mint", amount + " Units");
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 16+16+1) msg = rest;
 		}
 		else if(subtype == 8)
 		{
@@ -1118,7 +1134,25 @@ function extractBytesData(bytes)
 		}
 	}
 
+	var message = getModifierBit(flags, 0);
+	var publicKey = getModifierBit(flags, 2);
+	if(message && msg.length)
+	{
+		$("#modal_review_message").removeAttr("disabled");
+		var len = bytesWord([msg[1],msg[2]]);
+		var str = converters.byteArrayToString(msg.slice(3,3+len));
+		alert(str);
+		$("#modal_review_message").attr("data-content", str);
+	}
+
+	// appendages... ugh... and no icons, how will I do this..
+
 	$("#modal_review").modal("show");
+}
+
+function getModifierBit(target, position)
+{
+	return (target >> position)%2;
 }
 
 function setReview(number, key, value)
@@ -1491,11 +1525,11 @@ $("document").ready(function() {
 	})
 
 	$("#modal_signed_broadcast").click(function() {
-		broadcastTransaction(NODE, $("#modal_signed_box").val());
+		broadcastTransaction(getBroadcastNode(), $("#modal_signed_box").val());
 	});
 
 	$("#modal_quick_sure_send").click(function() {
-		broadcastTransaction(NODE, $("#modal_quick_sure").data("tx"));
+		broadcastTransaction(getBroadCastNode(), $("#modal_quick_sure").data("tx"));
 	})
 
 	$("#modal_verify_token").on("show.bs.modal", function() {
