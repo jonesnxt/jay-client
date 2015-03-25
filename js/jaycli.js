@@ -480,8 +480,6 @@ function broadcastTransaction(nd, bytes)
 function transactionBroadcasted(resp, state)
 {
 	var response = JSON.parse(resp);
-	alert(resp);
-	alert(state);
 	$("#modal_signed").modal("hide");
 	$("#modal_quick_sure").modal("hide");
 	if(state != "success")
@@ -781,7 +779,6 @@ function startTRF(sender, trfBytes)
 {
 	var bytes = base62Decode(trfBytes.substring(3));
 	console.log(JSON.stringify(bytes));
-	console.log(JSON.stringify(bytes.length));
 	if(bytes[0] == '1')
 	{
 		bytes = bytes.slice(1);
@@ -840,7 +837,7 @@ function extractBytesData(bytes)
 
 	$("#modal_review").data("bytes", converters.byteArrayToHexString(bytes));
 	var type = bytes[0];
-	var subtype = bytes[1] >> 4;
+	var subtype = bytes[1] % 16;
 	var sender = getAccountIdFromPublicKey(converters.byteArrayToHexString(bytes.slice(8, 8+32)), true);
 	var r = new NxtAddress();
 	r.set(byteArrayToBigInteger(bytes.slice(40, 48)).toString());
@@ -929,60 +926,60 @@ function extractBytesData(bytes)
 			setReview(1, "Type", typeName);
 			setReview(2, "Sender", sender);
 			setReview(3, "Recipient", recipient);
-			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			var assetId = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(4, "Asset Id", assetId);
-			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			var amount = byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(5, "Amount", amount + " QNT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 17) msg = rest;
+			if(rest.length > 17) msg = rest.slice(17);
 		}
 		else if(subtype == 2) 
 		{
 			typeName = "Ask Order Placement";
 			setReview(1, "Type", typeName);
 			setReview(2, "Trader", sender);
-			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			var assetId = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Asset Id", assetId);
-			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			var amount = byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(4, "Amount", amount + " QNT");
-			var price = converters.byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString;
+			var price = byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString();
 			setReview(5, "Price", price/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 25) msg = rest;
+			if(rest.length > 25) msg = rest.slice(25);
 		}
 		else if(subtype == 3) 
 		{
 			typeName = "Bid Order Placement";
 			setReview(1, "Type", typeName);
 			setReview(2, "Trader", sender);
-			var assetid = converters.byteArrayToString(rest.slice(1, 1+8));
+			var assetId = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Asset Id", assetId);
-			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
+			var amount = byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(4, "Amount", amount + " QNT");
-			var price = converters.byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString;
+			var price = byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString();
 			setReview(5, "Price", price/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 25) msg = rest;
+			if(rest.length > 25) msg = rest.slice(25);
 		}
 		else if(subtype == 4) 
 		{
 			typeName = "Ask Order Cancellation";
 			setReview(1, "Type", typeName);
 			setReview(2, "Trader", sender);
-			var order = converters.byteArrayToString(rest.slice(1, 1+8));
+			var order = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Order Id", order);
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 9) msg = rest;
+			if(rest.length > 9) msg = rest.slice(9);
 		}
 		else if(subtype == 5)
 		{
 			typeName = "Bid Order Cancellation";
 			setReview(1, "Type", typeName);
 			setReview(2, "Trader", sender);
-			var order = converters.byteArrayToString(rest.slice(1, 1+8));
+			var order = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Order Id", order);
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 9) msg = rest;
+			if(rest.length > 9) msg = rest.slice(9);
 		}
 	}
 	else if(type == 3)
@@ -1005,7 +1002,7 @@ function extractBytesData(bytes)
 			var newprice = converters.byteArrayToBigInteger(rest.slice(1+8, 1+8+8));
 			setReview(4, "New Price", qnt/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 1+8+8) msg = rest;
+			if(rest.length > 1+8+8) msg = rest.slice(17);
 		}
 		else if(subtype == 3) 
 		{
@@ -1018,7 +1015,7 @@ function extractBytesData(bytes)
 			if(chg < 0) setReview(4, "Decrease By", -qnt);
 			else setReview(4, "Increase By", qnt);
 			setReview(5, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 1+8+4) msg = rest;
+			if(rest.length > 1+8+4) msg = rest.slice(13);
 		}
 		else if(subtype == 4)
 		{
@@ -1032,7 +1029,7 @@ function extractBytesData(bytes)
 			var price = converters.byteArrayToBigInteger(rest.slice(1+8+4, 1+16+4)).toString();
 			setReview(5, "Price", price/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 1+16+8) msg = rest;
+			if(rest.length > 1+16+8) msg = rest.slice(25);
 		}
 		else if(subtype == 5)
 		{
@@ -1044,7 +1041,7 @@ function extractBytesData(bytes)
 			var discount = converters.byteArrayToBigInteger(rest.slice(rest.length-8)).toString();
 			setReview(4, "Discount", discount/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 1+8) msg = rest;
+			if(rest.length > 1+8) msg = rest.slice(9);
 		
 		}
 		else if(subtype == 6) 
@@ -1066,7 +1063,7 @@ function extractBytesData(bytes)
 			var lease = bytesWord(rest.slice(1,3));
 			setReview(3, "Length", lease + " blocks");
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 3) msg = rest;
+			if(rest.length > 3) msg = rest.slice(3);
 		} 
 	}
 	else if(type == 5)
@@ -1085,7 +1082,7 @@ function extractBytesData(bytes)
 			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(4, "Amount per Unit", amount + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 17) msg = rest;
+			if(rest.length > 17) msg = rest.slice(17);
 		}
 		else if(subtype == 2)
 		{
@@ -1102,7 +1099,7 @@ function extractBytesData(bytes)
 			var amount = converters.byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(5, "Amount", amount + " QNT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 17) msg = rest;
+			if(rest.length > 17) msg = rest.slice(17);
 		}
 		else if(subtype == 4)
 		{
@@ -1126,7 +1123,7 @@ function extractBytesData(bytes)
 			var amount = converters.byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString();
 			setReview(4, "Amount To Mint", amount + " Units");
 			setReview(5, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 16+16+1) msg = rest;
+			if(rest.length > 16+16+1) msg = rest.slice(33);
 		}
 		else if(subtype == 8)
 		{
@@ -1140,18 +1137,17 @@ function extractBytesData(bytes)
 	{
 		$("#modal_review_message").removeAttr("disabled");
 		var len = bytesWord([msg[1],msg[2]]);
-		var str = converters.byteArrayToString(msg.slice(3,3+len));
-		alert(str);
+		var str = converters.byteArrayToString(msg.slice(5,5+len));
 		$("#modal_review_message").attr("data-content", str);
-		str = str.slice(3+len);
+		msg = msg.slice(3+len);
 	}
 	else $("#modal_review_message").attr("disabled", "true");
 	if(publicKey && msg.length)
 	{
 		$("#modal_review_public_key").removeAttr("disabled");
-		var str = str.slice(1,65);
+		var str = converters.byteArrayToHexString(msg.slice(1,65));
 		$("#modal_review_public_key").attr("data-content", str);
-		str = str.slice(65);
+		msg = msg.slice(65);
 	}
 	else $("#modal_review_public_key").attr("disabled","true");
 

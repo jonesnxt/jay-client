@@ -55,7 +55,11 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 //storeAccount(newAccount("1234"));
 </script>
-
+<style type="text/css">
+.popover {
+word-wrap: break-word;
+}
+</style>
 </head>
 
 <body>
@@ -201,9 +205,9 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 	<ul id="popout_tabs" class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
 		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
-		<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>
+		<!--<li role="presentation"><a href="#message" aria-controls="message" role="tab" data-toggle="tab">Message</a></li>-->
 		<li role="presentation"><a href="#accounts" aria-controls="accounts" role="tab" data-toggle="tab">Account</a></li>
-		<li role="presentation"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">?</a></li>
+		<li role="presentation"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">About</a></li>
 	</ul>
 	<br/>
 	<!-- Tab panes -->
@@ -334,14 +338,17 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 			<div class="container">
 				<dl>
   					<dt>Version</dt>
-  					<dd id="info_version">0.00</dd>
+  					<dd id="info_version">1.00</dd>
+
+  					<dt>NRS Base</dt>
+  					<dd id="info_nrs">1.4</dd>
 
   					<dt>Build Date</dt>
   					<dd id="info_date">March 2015</dd>
 
   					<dt>Created By</dt>
   					<dd id="info_created">Jones</dd>
-				</dl><br/>
+				</dl>
 				<button class="btn btn-primary btn-block" type="button" data-toggle="modal" data-source="broadcast" data-target="#modal_broadcast">Change Broadcast Node</button>
 			</div>
 		</div>
@@ -695,7 +702,7 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
       		<div class="modal-footer" style="padding:6px;margin:6px;">
       			<button type="button" class="btn btn-default btn-sm pull-left" data-container="body" data-toggle="popover" data-placement="top" title="Message Data" disabled id="modal_review_message">Message
 				</button>
-				<button type="button" class="btn btn-default btn-sm pull-left" data-container="body" data-toggle="popover" data-placement="top" title="Public Key" disabled id="modal_review_public_key">Public Key
+				<button type="button" class="btn btn-default btn-sm pull-left" data-container="body" data-toggle="popover" data-placement="top" title="Public Key Announcement" disabled id="modal_review_public_key">Public Key
 				</button>
         		<button type="button" class="btn btn-sm btn-default" id="modal_review_cancel" data-dismiss="modal">Cancel</button>
         		<button type="button" class="btn btn-sm btn-primary" id="modal_review_continue">Continue</button>
