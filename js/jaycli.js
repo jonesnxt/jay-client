@@ -834,7 +834,8 @@ function extractBytesData(bytes)
 	// the 8 zones will need to be really small.
 	// type sender amount recip extra for attachment...
 	clearReview();
-
+	$("#modal_review_description").attr("disabled", "true");
+	$("#modal_review_description").attr("data-content", "");
 	$("#modal_review").data("bytes", converters.byteArrayToHexString(bytes));
 	var type = bytes[0];
 	var subtype = bytes[1] % 16;
@@ -880,8 +881,9 @@ function extractBytesData(bytes)
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
 			setReview(3, "Alias Name", alias);
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			var data = converters.byteArrayToString(rest.slice(2+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
-			setReview(5, "Data", data);
+			var data = converters.byteArrayToString(rest.slice(4+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
+			$("#modal_review_description").removeAttr("disabled");
+			$("#modal_review_description").attr("data-content", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
 		}
 		else if(subtype == 2)
@@ -894,7 +896,7 @@ function extractBytesData(bytes)
 		}
 		else if(subtype == 4)
 		{
-			typeName = "Hub Announcement";
+			typeName = "Hub Announcement"; //  what even is this?
 		}
 		else if(subtype == 5) 
 		{
@@ -904,22 +906,55 @@ function extractBytesData(bytes)
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
 			setReview(3, "Name", alias);
 			setReview(4, "Fee", fee/100000000 + " nxt");
-			var data = converters.byteArrayToString(rest.slice(2+rest[1], 4+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))));
-			setReview(5, "Description", data);
+			var data = converters.byteArrayToString(rest.slice(4+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
+			$("#modal_review_description").removeAttr("disabled");
+			$("#modal_review_description").attr("data-content", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
 		}
 		else if(subtype == 6) 
 		{
 			typeName = "Alias Sell";
+			setReview(1, "Type", typeName);
+			setReview(2, "Seller", sender);
+			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
+			if(recipient == "NXT-2222-2222-2222-22222") setReview(3, "Buyer", "Anyone");
+			else setReview(3, "Buyer", recipient);
+			setReview(4, "Alias Name", alias);
+			var price = byteArrayToBigInteger(rest.slice(2+rest[1], 10+rest[1])).toString();
+			setReview(5, "Sell Price", price);
+			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 10+rest[1]) msg = rest.slice(10+rest[1]);
 		}
 		else if(subtype == 7) 
 		{
 			typeName = "Alias Buy";
+			setReview(1, "Type", typeName);
+			setReview(2, "Buyer", sender);
+			setReview(3, "Seller", recipient);
+			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
+			setReview(4, "Alias", alias);
+			setReview(5, "Buy Price", amount/100000000 + " nxt");
+			setReview(6, "Fee", fee/100000000 + " nxt");
 		}
 	}
 	else if(type == 2)
 	{
-		if(subtype == 0) typeName = "Asset Issuance";
+		if(subtype == 0) 
+		{
+			typeName = "Asset Issuance";
+			setReview(1, "Type", typeName);
+			setRevieW(2, "Issuer", sender);
+			var name = converters.byteArrayToString(rest.slice(2,rest[1]+2));
+			setReview(3, "Asset Name", name);
+			var data = converters.byteArrayToString(rest.slice(4+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
+			var newpos = 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]]);
+			$("#modal_review_description").removeAttr("disabled");
+			$("#modal_review_description").attr("data-content", data);
+			var units = byteArrayToBigInteger(rest.slice(newpos, newpos+8));
+			setReview(4, "Units", units);
+			setReview(5, "Decimals", rest[newpos+8]);
+			setReview(6, "Fee", fee/100000000 + " nxt");
+		}
 		else if(subtype == 1) 
 		{
 			typeName = "Asset Transfer";
@@ -987,10 +1022,32 @@ function extractBytesData(bytes)
 		if(subtype == 0) 
 		{
 			typeName = "Goods Listing";
+			setReview(1, "Type", typeName);
+			setRevieW(2, "Seller", sender);
+			var name = converters.byteArrayToString(rest.slice(3,rest[1]+2));
+			setReview(3, "Good Name", name);
+			var data = converters.byteArrayToString(rest.slice(4+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
+			var newpos = 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]]);
+			var tags = converters.byteArrayToString(rest.slice(newpos+2, newpos+2+bytesWord([rest[newpos],rest[newpos+1]])));
+			newpos = newpos+2+bytesWord([rest[newpos],rest[newpos+1]]);
+			setReview(4, "Tags", tags);
+			$("#modal_review_description").removeAttr("disabled");
+			$("#modal_review_description").attr("data-content", data);
+			var amount = converters.byteArrayToSignedInt32(rest.slice(newpos, newpos+4));
+			var price = byteArrayToBigInteger(rest.slice(newpos+4, newpos+12)).toString();
+			setReview(5, "Amount (price)", amount + "(" + price/100000000 + " nxt)");
+			setReview(6, "Fee", fee/100000000 + " nxt");
 		}
 		else if(subtype == 1) 
 		{
 			typeName = "Goods Delisting";
+			setReview(1, "Type", typeName);
+			setReview(2, "Seller", sender);
+			var order = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Item Id", order);
+			setReview(4, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 9) msg = rest.slice(9);
+
 		}
 		else if(subtype == 2) 
 		{
@@ -1047,6 +1104,7 @@ function extractBytesData(bytes)
 		else if(subtype == 6) 
 		{
 			typeName = "Feedback";
+			
 		}
 		else if(subtype == 7) 
 		{
