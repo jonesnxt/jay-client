@@ -999,8 +999,8 @@ function extractBytesData(bytes)
 			setReview(2, "Seller", sender);
 			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Item Id", goodid);
-			var newprice = converters.byteArrayToBigInteger(rest.slice(1+8, 1+8+8));
-			setReview(4, "New Price", qnt/100000000 + " nxt");
+			var newprice = converters.byteArrayToBigInteger(rest.slice(1+8, 1+8+8)).toString();
+			setReview(4, "New Price", nowprice/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+8) msg = rest.slice(17);
 		}
@@ -1012,8 +1012,8 @@ function extractBytesData(bytes)
 			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Item Id", goodid);
 			var chg = converters.byteArrayToSignedInt32(rest.slice(1+8, 1+8+4));
-			if(chg < 0) setReview(4, "Decrease By", -qnt);
-			else setReview(4, "Increase By", qnt);
+			if(chg < 0) setReview(4, "Decrease By", -chg);
+			else setReview(4, "Increase By", chg);
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+4) msg = rest.slice(13);
 		}
