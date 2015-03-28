@@ -935,6 +935,7 @@ function extractBytesData(bytes)
 			setReview(4, "Alias", alias);
 			setReview(5, "Buy Price", amount/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 2+rest[1]) msg = rest.slice(2+rest[1])
 		}
 	}
 	else if(type == 2)
@@ -1104,11 +1105,25 @@ function extractBytesData(bytes)
 		else if(subtype == 6) 
 		{
 			typeName = "Feedback";
-			
+			setReview(1, "Type", typeName);
+			setReview(2, "User", sender);
+			setReview(3, "Seller", recipient);
+			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(4, "Item Id", goodid);
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 1+8) msg = rest.slice(9);
 		}
 		else if(subtype == 7) 
 		{
 			typeName = "Refund";
+			setReview(1, "Type", typeName);
+			setReview(2, "Seller", sender);
+			var goodid = converters.byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
+			setReview(3, "Purchase Id", goodid);
+			var discount = converters.byteArrayToBigInteger(rest.slice(1+8,1+16)).toString();
+			setReview(4, "Refund Amount", discount/100000000 + " nxt");
+			setReview(5, "Fee", fee/100000000 + " nxt");
+			if(rest.length > 1+16) msg = rest.slice(17);
 		}
 	}
 	else if(type == 4)
