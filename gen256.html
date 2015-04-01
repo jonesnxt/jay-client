@@ -1,0 +1,15 @@
+<script src="js/jquery.js"></script>
+<script src="js/jssha256.js"></script>
+<script src="js/converters.js"></script>
+<script>
+$("document").ready(function() {
+	$("textarea").on("input propertychange", function() {
+		SHA256_init();
+		SHA256_write($("textarea").val());
+		$("span").text(converters.byteArrayToHexString(SHA256_finalize()));
+	})
+})
+</script>
+<h1>SHA256 Generator</h1>
+<textarea rows="10" cols="100"></textarea><br/>
+<span><span>
