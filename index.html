@@ -36,7 +36,7 @@ $('[data-toggle="tooltip"]').tooltip()
 $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 	$(".buttonc").click( function() {
-		window.open("index.html?popout=true", "_blank", "width=400, height=300")
+		window.open("index.html?popout=true", "_blank", "width=400, height=320")
 
 
 	});
@@ -307,9 +307,6 @@ word-wrap: break-word;
 					<div class="form-group">
 						<div class="btn-group btn-group-justified" role="group" aria-label="...">
   							<div class="btn-group" role="group">
-    							<button id="accounts_export" type="button" class="btn btn-default" data-toggle="modal" data-source="export" data-target="#modal_enter_pin">Export</button>
-  							</div>
-  							<div class="btn-group" role="group">
     							<button id="accounts_pin" type="button" class="btn btn-default" data-toggle="modal" data-source="change" data-target="#modal_enter_pin">Change PIN</button>
   							</div>
   							<div class="btn-group" role="group">
@@ -323,11 +320,11 @@ word-wrap: break-word;
     							<button id="accounts_import" type="button" class="btn btn-default" data-toggle="modal" data-source="import" data-target="#modal_import">Import</button>
   							</div>
   							<div class="btn-group" role="group">
-    							<button id="accounts_backup" type="button" class="btn btn-default" data-toggle="modal" data-source="backup" data-target="#modal_backup">Backup</button>
+    							<button id="accounts_export" type="button" class="btn btn-default" data-toggle="modal" data-source="export" data-target="#modal_enter_pin">Export</button>
   							</div>
   							<div class="btn-group" role="group">
-    							<button id="accounts_restore" type="button" class="btn btn-default">Restore</button>
-  							</div>
+  								<button class="btn btn-default btn-block" type="button" data-toggle="modal" data-source="broadcast" data-target="#modal_broadcast">Change Node</button>
+							</div>
 						</div>
 					</div>
 					<button id="accounts_new" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-source="accounts_new" data-target="#modal_enter_pin">New Account</button>
@@ -336,20 +333,23 @@ word-wrap: break-word;
 		</div>
 		<div role="tabpanel" class="tab-pane" id="info">
 			<div class="container">
+				<div class="col-xs-6">
 				<dl>
   					<dt>Version</dt>
   					<dd id="info_version">1.00</dd>
 
   					<dt>NRS Base</dt>
   					<dd id="info_nrs">1.4</dd>
-
+  				</dl>
+  			</div>
+  			<div class="col-xs-6">
+  				<dl>
   					<dt>Build Date</dt>
   					<dd id="info_date">March 2015</dd>
 
   					<dt>Created By</dt>
   					<dd id="info_created">Jones</dd>
 				</dl>
-				<button class="btn btn-primary btn-block" type="button" data-toggle="modal" data-source="broadcast" data-target="#modal_broadcast">Change Broadcast Node</button>
 			</div>
 		</div>
 	</div>
@@ -446,7 +446,7 @@ word-wrap: break-word;
       					</dd>
       				</dl>
       				<div class="form-group-sm">
-      					<label for="modal_accounts_new_recovery" class="control-label">Export Key</label>
+      					<label for="modal_accounts_new_recovery" class="control-label">Recovery Key</label>
 						<input id="modal_accounts_new_recovery" type="text" class="form-control input-sm" readonly/>
 						<span class="help-block" style="margin-bottom:0;padding-bottom:0;">Write down and keep in a secure location.</span>
       				</div>
@@ -514,9 +514,9 @@ word-wrap: break-word;
       				</dd>
       			</dl>
       			<div class="form-group" style="margin-bottom:0;padding-bottom:0;">
-      				<label for="modal_export_key" class="control-label">Export Key</label>
+      				<label for="modal_export_key" class="control-label">Recovery Key</label>
 					<input id="modal_export_key" type="text" class="form-control input-sm" readonly/>
-					<span class="help-text">Export key works as an Nxt secret phrase.</span>
+					<span class="help-text">Recovery key works as an Nxt secret phrase.</span>
       			</div>
       		</div>
       		<div class="modal-footer">
@@ -564,7 +564,7 @@ word-wrap: break-word;
       			<div class="form-group" style="margin-bottom:0;padding-bottom:0;">
       				<label for="modal_import_key" class="control-label">Import</label>
 					<input id="modal_import_key" type="text" class="form-control input-sm"/>
-					<span class="help-text">Use Export Key or Nxt secret phrase.</span>
+					<span class="help-text">Use Recovery Key or Nxt secret phrase.</span>
       			</div>
       		</div>
       		<div class="modal-footer">

@@ -329,7 +329,7 @@ function timeago(timestamp)
 
 function rndstr(len)
 {
-	var letters = "abcdefghjkmnpqrtuvwxyABCDEFGHJKLMNPQRTUVWXY3456789";
+	var letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 	var ret = "";
 	var nums = window.crypto.getRandomValues(new Uint32Array(len));
 
@@ -342,7 +342,7 @@ function rndstr(len)
 
 function generateSecretPhrase()
 {
-	return rndstr(30);
+	return rndstr(6) + "_" + rndstr(6) +  "_" + rndstr(6) + "_" + rndstr(6) + "_" + rndstr(6);
 }
 
 function encryptSecretPhrase(phrase, key)
