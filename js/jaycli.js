@@ -522,7 +522,7 @@ function getBroadcastNode()
 		localStorage["node"] = DEFAULT_NODE;
 	}
 	else node += localStorage["node"];
-	if(localStorage["isTestnet"]) node += ":6876";
+	if(localStorage["isTestnet"] == "true") node += ":6876";
 	else node += ":7876";
 	return node + "/nxt";
 }
