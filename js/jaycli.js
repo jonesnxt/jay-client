@@ -944,7 +944,7 @@ function extractBytesData(bytes)
 		{
 			typeName = "Asset Issuance";
 			setReview(1, "Type", typeName);
-			setRevieW(2, "Issuer", sender);
+			setReview(2, "Issuer", sender);
 			var name = converters.byteArrayToString(rest.slice(2,rest[1]+2));
 			setReview(3, "Asset Name", name);
 			var data = converters.byteArrayToString(rest.slice(4+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
@@ -979,7 +979,7 @@ function extractBytesData(bytes)
 			var amount = byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(4, "Amount", amount + " QNT");
 			var price = byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString();
-			setReview(5, "Price", price/100000000 + " nxt");
+			setReview(5, "Price", price + " NQT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
 		}
@@ -993,7 +993,7 @@ function extractBytesData(bytes)
 			var amount = byteArrayToBigInteger(rest.slice(1+8, 1+16)).toString();
 			setReview(4, "Amount", amount + " QNT");
 			var price = byteArrayToBigInteger(rest.slice(1+16, 1+24)).toString();
-			setReview(5, "Price", price/100000000 + " nxt");
+			setReview(5, "Price", price + " NQT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
 		}
