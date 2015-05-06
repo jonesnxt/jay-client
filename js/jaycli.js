@@ -1058,7 +1058,7 @@ function extractBytesData(bytes)
 			var goodid = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Item Id", goodid);
 			var newprice = byteArrayToBigInteger(rest.slice(1+8, 1+8+8)).toString();
-			setReview(4, "New Price", nowprice/100000000 + " nxt");
+			setReview(4, "New Price", newprice/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+8) msg = rest.slice(17);
 		}
