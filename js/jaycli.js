@@ -1024,7 +1024,7 @@ function extractBytesData(bytes)
 		{
 			typeName = "Goods Listing";
 			setReview(1, "Type", typeName);
-			setRevieW(2, "Seller", sender);
+			setReview(2, "Seller", sender);
 			var name = converters.byteArrayToString(rest.slice(3,rest[1]+2));
 			setReview(3, "Good Name", name);
 			var data = converters.byteArrayToString(rest.slice(4+rest[1], 4+rest[1]+bytesWord([rest[2+rest[1]], rest[3+rest[1]]])));
