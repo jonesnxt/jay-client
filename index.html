@@ -675,8 +675,21 @@ word-wrap: break-word;
        			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         		<h4 class="modal-title" id="modal_review_title">Transaction Review</h4>
       		</div>
-      		<div class="modal-body" style="padding-top:6px;margin-top:0;padding-bottom:0,margin-bottom:0;">
-      			<div class="row">
+      		<div class="modal-body" style="padding-top:6px;margin-top:0;padding-bottom:0;margin-bottom:0;">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <span id="tx_desc"></span>
+                    </div>
+                </div>
+                  <div class="row">
+                      <div class="col-xs-12">
+                          <div style="font-style: italic; color: #737373; padding-top:34px">
+                              <b>Fee:</b> <span id="tx_fee"></span> NXT<br />
+                              <b><span id="tx_sender_title"></span>:</b> <span id="tx_sender"></span>
+                          </div>
+                      </div>
+                  </div>
+      			<div class="row" style="display:none">
 	      			<div class="col-xs-6">
 	      				<dl class="dl-horizontal" style="padding-top:0;margin-top:0;padding-bottom:0;margin-bottom:2px;">
 	      				<dt id="modal_review_key_1"></dt>
