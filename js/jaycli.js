@@ -957,7 +957,10 @@ function extractBytesData(bytes)
 			setReview(4, "Alias", alias);
 			setReview(5, "Buy Price", amount/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 2+rest[1]) msg = rest.slice(2+rest[1])
+			if(rest.length > 2+rest[1]) msg = rest.slice(2+rest[1]);
+
+			$("#tx_desc").html("Buy alias <b>" + alias + "</b> from <b>" + recipient + "</b> for <b>" + amount/100000000 + " NXT</b>");
+			$("#tx_sender_title").text("Buyer");
 		}
 	}
 	else if(type == 2)
