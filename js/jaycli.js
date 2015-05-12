@@ -507,10 +507,11 @@ function transactionBroadcasted(resp, state)
 	}
 }
 
-function setBroadcastNode(node, isTestnet)
+function setBroadcastNode(node, isTestnet, isAlwaysSend)
 {
 	localStorage["node"] = node;
 	localStorage["isTestnet"] = (isTestnet === true);
+	localStorage["isAlwaysSend"] = (isAlwaysSend === true);
 }
 
 function getBroadcastNode()
@@ -1623,6 +1624,8 @@ $("document").ready(function() {
 		var old = localStorage["node"];
 		if(localStorage["isTestnet"] == "true") old += " (testnet)";
 		else old += " (mainnet)";
+		if (localStorage["isAlwaysSend"] == "true") $("#modal_broadcast_always_send").prop('checked', true);
+		else $("#modal_broadcast_always_send").prop('checked', false);
 		$("#modal_broadcast_old").text(old);
 		$("#modal_broadcast_node").text("");
 		$("#modal_broadcast_testnet").removeAttr("checked");
@@ -1631,7 +1634,8 @@ $("document").ready(function() {
 	$("#modal_broadcast_save").click(function() {
 		var node = $("#modal_broadcast_node").val();
 		var isTestnet = $("#modal_broadcast_testnet").is(":checked");
-		setBroadcastNode(node, isTestnet);
+		var isAlwaysSend = $("#modal_broadcast_always_send").is(":checked");
+		setBroadcastNode(node, isTestnet, isAlwaysSend);
 		$("#modal_broadcast").modal("hide");
 	})
 
