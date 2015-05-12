@@ -977,9 +977,13 @@ function extractBytesData(bytes)
 			$("#modal_review_description").removeAttr("disabled");
 			$("#modal_review_description").attr("data-content", data);
 			var units = byteArrayToBigInteger(rest.slice(newpos, newpos+8));
+			var decimals = rest[newpos+8];
 			setReview(4, "Units", units);
-			setReview(5, "Decimals", rest[newpos+8]);
+			setReview(5, "Decimals", decimals);
 			setReview(6, "Fee", fee/100000000 + " nxt");
+
+			$("#tx_desc").html("Issue <b>" + units + " units</b> asset <b>" + name + "</b>, with decimal <b>" + decimals + "</b>");
+			$("#tx_sender_title").text("Issuer");
 		}
 		else if(subtype == 1) 
 		{
