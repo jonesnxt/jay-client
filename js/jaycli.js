@@ -870,6 +870,9 @@ function extractBytesData(bytes)
 	{
 		if(subtype == 0)
 		{
+		    $("#tx_desc").html("Send message to <b>" + recipient + "</b>");
+		    $("#tx_sender_title").text("Sender");
+
 			typeName = "Arbitrary Message";
 			setReview(1, "Type", typeName);
 			setReview(2, "Sender", sender);
