@@ -934,7 +934,7 @@ function extractBytesData(bytes)
 			setReview(1, "Type", typeName);
 			setReview(2, "Seller", sender);
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
-			if(recipient == "NXT-2222-2222-2222-22222") setReview(3, "Buyer", "Anyone");
+			if(recipient == "NXT-MRCC-2YLS-8M54-3CMAJ") setReview(3, "Buyer", "Anyone");
 			else setReview(3, "Buyer", recipient);
 			setReview(4, "Alias Name", alias);
 			var price = byteArrayToBigInteger(rest.slice(2+rest[1], 10+rest[1])).toString();
