@@ -854,6 +854,9 @@ function extractBytesData(bytes)
 	{
 		if(subtype == 0)
 		{
+		    $("#tx_desc").html("Send <b>" + amount / 100000000 + " NXT</b> to <b>" + recipient + "</b>");
+		    $("#tx_sender_title").text("Sender");
+		    
 			typeName = "Ordinary Payment";
 			setReview(1, "Type", typeName);
 			setReview(2, "Sender", sender);
@@ -1204,6 +1207,9 @@ function extractBytesData(bytes)
 			typeName = "Delete Currency";
 		}
 	}
+
+	$("#tx_fee").text(fee / 100000000);
+	$("#tx_sender").text(sender);
 
 	var message = getModifierBit(flags, 0);
 	var publicKey = getModifierBit(flags, 2);
