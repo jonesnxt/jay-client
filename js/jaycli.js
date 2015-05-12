@@ -978,6 +978,7 @@ function extractBytesData(bytes)
 			$("#modal_review_description").attr("data-content", data);
 			var units = byteArrayToBigInteger(rest.slice(newpos, newpos+8));
 			var decimals = rest[newpos+8];
+			units = units/Math.pow(10, decimals);
 			setReview(4, "Units", units);
 			setReview(5, "Decimals", decimals);
 			setReview(6, "Fee", fee/100000000 + " nxt");
