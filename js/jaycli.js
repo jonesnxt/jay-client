@@ -934,13 +934,18 @@ function extractBytesData(bytes)
 			setReview(1, "Type", typeName);
 			setReview(2, "Seller", sender);
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
-			if(recipient == "NXT-MRCC-2YLS-8M54-3CMAJ") setReview(3, "Buyer", "Anyone");
-			else setReview(3, "Buyer", recipient);
+			var target = "";
+			if (recipient == "NXT-MRCC-2YLS-8M54-3CMAJ") { setReview(3, "Buyer", "Anyone"); target = "anyone"; }
+			else { setReview(3, "Buyer", recipient); target = recipient; }
 			setReview(4, "Alias Name", alias);
-			var price = byteArrayToBigInteger(rest.slice(2+rest[1], 10+rest[1])).toString();
+			var price = byteArrayToBigInteger(rest.slice(2 + rest[1], 10 + rest[1])).toString();
+			price = price/100000000;
 			setReview(5, "Sell Price", price);
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 10+rest[1]) msg = rest.slice(10+rest[1]);
+
+			$("#tx_desc").html("Sell alias <b>" + alias + "</b> to <b>" + target + "</b> for <b>" + price + " NXT</b>");
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 7) 
 		{
