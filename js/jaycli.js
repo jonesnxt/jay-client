@@ -824,6 +824,10 @@ function clearReview()
 	setReview(5, "", "");
 	setReview(6, "", "");
 
+	$("#tx_desc").html("");
+	$("#tx_sender_title").text("");
+	$("#tx_fee").text("");
+	$("#tx_sender").text("");
 }
 
 function extractBytesData(bytes)
