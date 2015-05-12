@@ -924,6 +924,9 @@ function extractBytesData(bytes)
 			$("#modal_review_description").removeAttr("disabled");
 			$("#modal_review_description").attr("data-content", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
+
+			$("#tx_desc").html("Set <b>" + alias + "</b> as your account's name");
+			$("#tx_sender_title").text("Account");
 		}
 		else if(subtype == 6) 
 		{
