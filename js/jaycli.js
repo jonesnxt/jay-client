@@ -998,6 +998,9 @@ function extractBytesData(bytes)
 			setReview(5, "Amount", amount + " QNT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 17) msg = rest.slice(17);
+
+			$("#tx_desc").html("Transfer <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> to <b>" + recipient + "</b>");
+			$("#tx_sender_title").text("Sender");
 		}
 		else if(subtype == 2) 
 		{
