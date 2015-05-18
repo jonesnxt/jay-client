@@ -1738,7 +1738,7 @@ $("document").ready(function() {
 		if (localStorage["isAlwaysSend"] == "true") $("#modal_broadcast_always_send").prop('checked', true);
 		else $("#modal_broadcast_always_send").prop('checked', false);
 		$("#modal_broadcast_old").text(old);
-		$("#modal_broadcast_node").text("");
+		$("#modal_broadcast_node").val("");
 	})
 
 	$("#modal_broadcast_save").click(function() {
