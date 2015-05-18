@@ -512,7 +512,9 @@ function transactionBroadcasted(resp, state)
 
 function setBroadcastNode(node, isTestnet, isAlwaysSend)
 {
-	localStorage["node"] = node;
+    if (node) {
+        localStorage["node"] = node;
+    }
 	localStorage["isTestnet"] = (isTestnet === true);
 	Jay.isTestnet = (isTestnet === true);
 	localStorage["isAlwaysSend"] = (isAlwaysSend === true);
