@@ -1725,13 +1725,18 @@ $("document").ready(function() {
 
 	$("#modal_broadcast").on("show.bs.modal", function() {
 		var old = localStorage["node"];
-		if(localStorage["isTestnet"] == "true") old += " (testnet)";
-		else old += " (mainnet)";
+		if (localStorage["isTestnet"] == "true") {
+		    old += " (testnet)";
+		    $("#modal_broadcast_testnet").prop('checked', true)
+		}
+		else {
+		    old += " (mainnet)";
+		    $("#modal_broadcast_testnet").prop('checked', false);
+		}
 		if (localStorage["isAlwaysSend"] == "true") $("#modal_broadcast_always_send").prop('checked', true);
 		else $("#modal_broadcast_always_send").prop('checked', false);
 		$("#modal_broadcast_old").text(old);
 		$("#modal_broadcast_node").text("");
-		$("#modal_broadcast_testnet").removeAttr("checked");
 	})
 
 	$("#modal_broadcast_save").click(function() {
