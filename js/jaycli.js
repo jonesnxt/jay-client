@@ -413,6 +413,9 @@ function popoutOpen()
 		localStorage["node"] = DEFAULT_NODE;
 		localStorage["isTestnet"] = false;
 	}
+	if (!localStorage.hasOwnProperty("isAlwaysSend")) {
+	    localStorage["isAlwaysSend"] = true;
+	}
 	// ok lets deal with any popup setup thats needed.
 	if(!localStorage["accounts"] || JSON.parse(localStorage["accounts"]).length == 0)
 	{
@@ -511,6 +514,7 @@ function setBroadcastNode(node, isTestnet, isAlwaysSend)
 {
 	localStorage["node"] = node;
 	localStorage["isTestnet"] = (isTestnet === true);
+	Jay.isTestnet = (isTestnet === true);
 	localStorage["isAlwaysSend"] = (isAlwaysSend === true);
 }
 
@@ -828,6 +832,10 @@ function clearReview()
 	$("#tx_sender_title").text("");
 	$("#tx_fee").text("");
 	$("#tx_sender").text("");
+
+	$("#detailtx_loading").hide();
+	$("#detailtx_button").hide();
+	
 }
 
 function extractBytesData(bytes)
@@ -999,7 +1007,32 @@ function extractBytesData(bytes)
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 17) msg = rest.slice(17);
 
-			$("#tx_desc").html("Transfer <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> to <b>" + recipient + "</b>");
+			function assetTransfer_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.decimals) {
+			            amount = amount/Math.pow(10, data.decimals);
+			            $("#tx_desc").html("Transfer <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> to <b>" + recipient + "</b>");
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Transfer <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> to <b>" + recipient + "</b>");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
+			        $("#detailtx_button").hide();
+			    }).show();
+			}
 			$("#tx_sender_title").text("Sender");
 		}
 		else if(subtype == 2) 
@@ -1467,6 +1500,41 @@ function findAccount(address)
 	return false;
 }
 
+function getDetailTx(requestType, parameters, onSuccess) {
+    var requestMethod;
+    if (localStorage["isTestnet"] == "true") {
+        requestMethod = Jay.requestMethods.single;
+        Jay.singleNode = Jay.commonTestnetNodes[0];
+    }
+    else {
+        requestMethod = Jay.requestMethods.validate;
+    }
+    Jay.request(requestType, parameters, onSuccess, getDetailTx_OnFail, requestMethod);
+}
+
+function getDetailTx_OnFail(resp) {
+    if (resp) {
+        var data = JSON.parse(resp);
+        if (data.errorDescription) {
+            alert(data.errorDescription);
+        }
+        else {
+            alert("Fail to get transaction details");
+        }
+    }
+    else {
+        alert("Fail to get transaction details");
+    }
+}
+
+function isGetTxDetails() {
+    if (localStorage["isAlwaysSend"] == "true") {
+        $("#detailtx_loading").show();
+        return true;
+    }
+    else return false;
+}
+
 $("document").ready(function() {
 
 	$("#modal_enter_pin").on("show.bs.modal", function(e) {
@@ -1674,4 +1742,6 @@ $("document").ready(function() {
 		$("#modal_broadcast").modal("hide");
 	})
 
+	Jay.nodeScan(function () { });
+	if (localStorage["isTestnet"] == "true") Jay.isTestnet = true;
 }) 
