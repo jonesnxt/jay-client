@@ -41,17 +41,9 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 
 	});
-	if(getUrlParameter("popout") == "true")
-	{
-		$("#basepage").hide();
-		$("#popout").show();
-		popoutOpen();
-	}
-	else
-	{
-		$("#basepage").show();
-		$("#popout").hide();
-	}
+	$("#basepage").hide();
+	$("#popout").show();
+	popoutOpen();
 });
 
 //storeAccount(newAccount("1234"));
@@ -59,6 +51,22 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 <style type="text/css">
 .popover {
 word-wrap: break-word;
+}
+
+body {
+margin: 50px 0px;
+padding: 0px;
+text-align: center;
+}
+
+.content {
+width: 500px;
+height: 400px;
+margin: 0px auto;
+text-align: left;
+padding: 15px;
+border: 1px solid #333;
+background-color: #eee;
 }
 </style>
 </head>
@@ -202,7 +210,7 @@ word-wrap: break-word;
 	</div>-->
 </div>
 
-<div id="popout">
+<div id="popout" class="content">
 	<ul id="popout_tabs" class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
 		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
@@ -291,7 +299,7 @@ word-wrap: break-word;
 			</div>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="accounts">
-			<div class="container">
+			<div class="container-fluid">
 				<form id="accounts_form">
 					<div class="form-group">
 						<label for="accounts_account" class="control-label">Account</label>
@@ -333,7 +341,7 @@ word-wrap: break-word;
 			</div>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="info">
-			<div class="container">
+			<div class="container-fluid">
 				<div class="col-xs-6">
 				<dl>
   					<dt>Version</dt>
@@ -364,7 +372,7 @@ word-wrap: break-word;
         		<h4 class="modal-title" id="modal_enter_pin_title">Enter PIN</h4>
       		</div>
       		<div class="modal-body">
-      			<div class="container">
+      			<div class="container-fluid">
       				<div class="row">
       					<input type="password" id="modal_enter_pin_input" class="text-center form-control input-sm"/>
       				</div>
@@ -836,6 +844,6 @@ word-wrap: break-word;
 		</div>
   	</div>
 </div>
-
+</div>
 </body>
 </html>
