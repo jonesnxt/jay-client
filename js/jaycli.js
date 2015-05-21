@@ -1267,6 +1267,33 @@ function extractBytesData(bytes)
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 9) msg = rest.slice(9);
 
+			function goodDelisting_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.name) {
+			            var price = data.priceNQT / 100000000;
+			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + data.name + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>');
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Delete marketplace product <b>" + order + "</b>");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
+			        $("#detailtx_button").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 2) 
 		{
