@@ -1132,6 +1132,52 @@ function extractBytesData(bytes)
 			setReview(3, "Order Id", order);
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 9) msg = rest.slice(9);
+
+			var quantityQNT, priceNQT;
+			function getAskOrder_OnSuccess(resp, status, xhr) {
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.asset) {
+			            quantityQNT = data.quantityQNT;
+			            priceNQT = data.priceNQT;
+			            getDetailTx("getAsset", { "asset": data.asset }, getAskOrderGetAsset_OnSuccess);
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			function getAskOrderGetAsset_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.decimals) {
+			            var quantity = quantityQNT / Math.pow(10, data.decimals);
+			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
+			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each");
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Cancel ask order <b>" + order + "</b>");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
+			        $("#detailtx_button").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Trader");
 		}
 		else if(subtype == 5)
 		{
