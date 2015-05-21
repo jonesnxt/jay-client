@@ -1306,6 +1306,34 @@ function extractBytesData(bytes)
 			setReview(4, "New Price", newprice/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+8) msg = rest.slice(17);
+
+			function dgsPriceChange_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.name) {
+			            var price = data.priceNQT / 100000000;
+			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>");
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + goodid + "</b>");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
+			        $("#detailtx_button").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 3) 
 		{
