@@ -1404,6 +1404,35 @@ function extractBytesData(bytes)
 			setReview(5, "Price", price/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+16+8) msg = rest.slice(25);
+
+			function dgsPurchase_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.name) {
+			            $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + data.name + " (" + goodid + ")</b> at <b>" + price / 100000000 + " NXT</b> each").show();
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": goodid }, dgsPurchase_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + goodid + "</b> at <b>" + price / 100000000 + " NXT</b> each");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPurchase_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 5)
 		{
