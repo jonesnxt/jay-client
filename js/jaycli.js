@@ -1361,6 +1361,35 @@ function extractBytesData(bytes)
 			else setReview(4, "Increase By", chg);
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+4) msg = rest.slice(13);
+
+			function dgsQuantityChange_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.name) {
+			            $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": goodid }, dgsQuantityChange_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + goodid + "</b>");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": goodid }, dgsQuantityChange_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 4)
 		{
