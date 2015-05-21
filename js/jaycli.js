@@ -1093,6 +1093,35 @@ function extractBytesData(bytes)
 			setReview(5, "Price", price + " NQT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
+
+			function bidOrderPlacement_OnSuccess(resp, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        var data = JSON.parse(resp);
+			        if (data.decimals) {
+			            amount = amount / Math.pow(10, data.decimals);
+			            price = price / Math.pow(10, 8 - data.decimals);
+			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each");
+			        } else {
+			            getDetailTx_OnFail(resp);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Buy <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price + " NQT </b> each");
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
+			        $("#detailtx_button").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Trader");
 		}
 		else if(subtype == 4) 
 		{
