@@ -1015,7 +1015,7 @@ function extractBytesData(bytes)
 			        var data = JSON.parse(resp);
 			        if (data.decimals) {
 			            amount = amount/Math.pow(10, data.decimals);
-			            $("#tx_desc").html("Transfer <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> to <b>" + recipient + "</b>");
+			            $("#tx_desc").html("Transfer <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> to <b>" + recipient + "</b>").show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1033,6 +1033,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Sender");
@@ -1058,7 +1060,7 @@ function extractBytesData(bytes)
 			        if (data.decimals) {
 			            amount = amount / Math.pow(10, data.decimals);
 			            price = price / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Sell <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each");
+			            $("#tx_desc").html("Sell <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1076,6 +1078,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAsset", { "asset": assetId }, askOrderPlacement_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Trader");
@@ -1101,7 +1105,7 @@ function extractBytesData(bytes)
 			        if (data.decimals) {
 			            amount = amount / Math.pow(10, data.decimals);
 			            price = price / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each");
+			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1119,6 +1123,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Trader");
@@ -1157,7 +1163,7 @@ function extractBytesData(bytes)
 			        if (data.decimals) {
 			            var quantity = quantityQNT / Math.pow(10, data.decimals);
 			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each");
+			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1175,6 +1181,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Trader");
@@ -1213,7 +1221,7 @@ function extractBytesData(bytes)
 			        if (data.decimals) {
 			            var quantity = quantityQNT / Math.pow(10, data.decimals);
 			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Cancel bid order <b>" + order + "</b> - " + "Buy <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each");
+			            $("#tx_desc").html("Cancel bid order <b>" + order + "</b> - " + "Buy <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1231,6 +1239,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getBidOrder", { "order": order }, getBidOrder_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Trader");
@@ -1273,7 +1283,7 @@ function extractBytesData(bytes)
 			        var data = JSON.parse(resp);
 			        if (data.name) {
 			            var price = data.priceNQT / 100000000;
-			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + data.name + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>');
+			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + data.name + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>').show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1291,6 +1301,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Seller");
@@ -1313,7 +1325,7 @@ function extractBytesData(bytes)
 			        var data = JSON.parse(resp);
 			        if (data.name) {
 			            var price = data.priceNQT / 100000000;
-			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>");
+			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
 			        } else {
 			            getDetailTx_OnFail(resp);
 			        }
@@ -1331,6 +1343,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
 			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
 			    }).show();
 			}
 			$("#tx_sender_title").text("Seller");
