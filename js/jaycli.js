@@ -1482,6 +1482,9 @@ function extractBytesData(bytes)
 			setReview(3, "Length", lease + " blocks");
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 3) msg = rest.slice(3);
+
+			$("#tx_desc").html("Lease balance to <b>" + recipient + "</b> for <b>" + lease + " blocks</b>");
+			$("#tx_sender_title").text("Sender");
 		} 
 	}
 	else if(type == 5)
