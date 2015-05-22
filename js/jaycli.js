@@ -1501,7 +1501,7 @@ $("document").ready(function() {
 		var account = $("#"+source+"_account option:selected").text();
 
 		$(".account_selector option").removeAttr("selected");
-		$(".account_selector option:contains("+account+")").attr("selected", "selected");
+		$(".account_selector option:contains("+account+")").prop("selected", "selected");
 	});
 
 	$("#modal_accounts_info").on("show.bs.modal", function(e) {
