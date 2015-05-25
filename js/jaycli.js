@@ -2029,6 +2029,21 @@ $("document").ready(function() {
 		$("#modal_broadcast").modal("hide");
 	})
 
+	$("#popout_tabs a").click(function (e) {
+	    var tab = e.target.attributes.href.value;
+	    var focus;
+	    if (tab == "#transact") focus = "#transact_transaction";
+	    else if (tab == "#token") focus = "#token_data";
+
+	    if (focus) {
+	        setTimeout(function () { $(focus).focus(); }, 10);
+	    }
+	})
+
+	$(".modal").on("shown.bs.modal", function (e) {
+	    setTimeout(function () { $("#" + e.target.id).find('input:enabled:not([readonly])').first().focus(); }, 10);
+	})
+
 	Jay.nodeScan(function () { });
 	if (localStorage["isTestnet"] == "true") Jay.isTestnet = true;
 }) 
