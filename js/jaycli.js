@@ -1994,7 +1994,7 @@ $("document").ready(function() {
 	});
 
 	$("#modal_quick_sure_send").click(function() {
-		broadcastTransaction(getBroadCastNode(), $("#modal_quick_sure").data("tx"));
+	    broadcastTransaction(getBroadcastNode(), $("#modal_quick_sure").data("tx"));
 	})
 
 	$("#modal_verify_token").on("show.bs.modal", function() {
