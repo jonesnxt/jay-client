@@ -2044,6 +2044,15 @@ $("document").ready(function() {
 	    setTimeout(function () { $("#" + e.target.id).find('input:enabled:not([readonly])').first().focus(); }, 10);
 	})
 
+	$("#transact_transaction").keypress(function (e) {
+	    if (e.which == "13") {
+	        e.preventDefault();
+	        if ($(this).val()) {
+	            $(this).submit();
+	        }
+	    }
+	});
+
 	Jay.nodeScan(function () { });
 	if (localStorage["isTestnet"] == "true") Jay.isTestnet = true;
 }) 
