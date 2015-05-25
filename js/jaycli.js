@@ -1621,7 +1621,7 @@ function quicksendHandler(pin)
 		{
 			$("#modal_quick_sure_recipient").text(getAccountIdFromPublicKey(recipient, true) + " (with Public Key)");
 		}
-		$("#modal_quick_sure_amount").text(amount + " nxt");
+		$("#modal_quick_sure_amount").text(amount + " NXT");
 		$("#modal_quick_sure").modal("show");
 
 		// now we open the "are you sure" modal...tomorrow..
