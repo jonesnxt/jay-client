@@ -1009,15 +1009,14 @@ function extractBytesData(bytes)
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 17) msg = rest.slice(17);
 
-			function assetTransfer_OnSuccess(resp, status, xhr) {
+			function assetTransfer_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.decimals) {
+			        if (data.hasOwnProperty('decimals')) {
 			            amount = amount/Math.pow(10, data.decimals);
 			            $("#tx_desc").html("Transfer <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> to <b>" + recipient + "</b>").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1029,7 +1028,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Transfer <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> to <b>" + recipient + "</b>");
+			    $("#tx_desc").html("Transfer <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> to <b>" + recipient + "</b>").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1053,16 +1052,15 @@ function extractBytesData(bytes)
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
 
-			function askOrderPlacement_OnSuccess(resp, status, xhr) {
+			function askOrderPlacement_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.decimals) {
+			        if (data.hasOwnProperty('decimals')) {
 			            amount = amount / Math.pow(10, data.decimals);
 			            price = price / Math.pow(10, 8 - data.decimals);
 			            $("#tx_desc").html("Sell <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1074,7 +1072,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getAsset", { "asset": assetId }, askOrderPlacement_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Sell <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price +" NQT </b> each");
+			    $("#tx_desc").html("Sell <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price +" NQT </b> each").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAsset", { "asset": assetId }, askOrderPlacement_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1098,16 +1096,15 @@ function extractBytesData(bytes)
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
 
-			function bidOrderPlacement_OnSuccess(resp, status, xhr) {
+			function bidOrderPlacement_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.decimals) {
+			        if (data.hasOwnProperty('decimals')) {
 			            amount = amount / Math.pow(10, data.decimals);
 			            price = price / Math.pow(10, 8 - data.decimals);
 			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1119,7 +1116,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Buy <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price + " NQT </b> each");
+			    $("#tx_desc").html("Buy <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price + " NQT </b> each").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1140,15 +1137,14 @@ function extractBytesData(bytes)
 			if(rest.length > 9) msg = rest.slice(9);
 
 			var quantityQNT, priceNQT;
-			function getAskOrder_OnSuccess(resp, status, xhr) {
+			function getAskOrder_OnSuccess(data, status, xhr) {
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.asset) {
+			        if (data.hasOwnProperty('asset')) {
 			            quantityQNT = data.quantityQNT;
 			            priceNQT = data.priceNQT;
 			            getDetailTx("getAsset", { "asset": data.asset }, getAskOrderGetAsset_OnSuccess);
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1156,16 +1152,15 @@ function extractBytesData(bytes)
 			    }
 			}
 
-			function getAskOrderGetAsset_OnSuccess(resp, status, xhr) {
+			function getAskOrderGetAsset_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.decimals) {
+			        if (data.hasOwnProperty('decimals')) {
 			            var quantity = quantityQNT / Math.pow(10, data.decimals);
 			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
 			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1177,7 +1172,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Cancel ask order <b>" + order + "</b>");
+			    $("#tx_desc").html("Cancel ask order <b>" + order + "</b>").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1198,15 +1193,14 @@ function extractBytesData(bytes)
 			if(rest.length > 9) msg = rest.slice(9);
 
 			var quantityQNT, priceNQT;
-			function getBidOrder_OnSuccess(resp, status, xhr) {
+			function getBidOrder_OnSuccess(data, status, xhr) {
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.asset) {
+			        if (data.hasOwnProperty('asset')) {
 			            quantityQNT = data.quantityQNT;
 			            priceNQT = data.priceNQT;
 			            getDetailTx("getAsset", { "asset": data.asset }, getBidOrderGetAsset_OnSuccess);
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1214,16 +1208,15 @@ function extractBytesData(bytes)
 			    }
 			}
 
-			function getBidOrderGetAsset_OnSuccess(resp, status, xhr) {
+			function getBidOrderGetAsset_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.decimals) {
+			        if (data.hasOwnProperty('decimals')) {
 			            var quantity = quantityQNT / Math.pow(10, data.decimals);
 			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
 			            $("#tx_desc").html("Cancel bid order <b>" + order + "</b> - " + "Buy <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1235,7 +1228,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getBidOrder", { "order": order }, getBidOrder_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Cancel bid order <b>" + order + "</b>");
+			    $("#tx_desc").html("Cancel bid order <b>" + order + "</b>").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getBidOrder", { "order": order }, getBidOrder_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1277,15 +1270,14 @@ function extractBytesData(bytes)
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 9) msg = rest.slice(9);
 
-			function goodDelisting_OnSuccess(resp, status, xhr) {
+			function goodDelisting_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.name) {
+			        if (data.hasOwnProperty('name')) {
 			            var price = data.priceNQT / 100000000;
 			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + data.name + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>').show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1297,7 +1289,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Delete marketplace product <b>" + order + "</b>");
+			    $("#tx_desc").html("Delete marketplace product <b>" + order + "</b>").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1319,15 +1311,14 @@ function extractBytesData(bytes)
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+8) msg = rest.slice(17);
 
-			function dgsPriceChange_OnSuccess(resp, status, xhr) {
+			function dgsPriceChange_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.name) {
+			        if (data.hasOwnProperty('name')) {
 			            var price = data.priceNQT / 100000000;
 			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1339,7 +1330,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + goodid + "</b>");
+			    $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + goodid + "</b>").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1362,14 +1353,13 @@ function extractBytesData(bytes)
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+4) msg = rest.slice(13);
 
-			function dgsQuantityChange_OnSuccess(resp, status, xhr) {
+			function dgsQuantityChange_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.name) {
+			        if (data.hasOwnProperty('name')) {
 			            $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1381,7 +1371,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getDGSGood", { "goods": goodid }, dgsQuantityChange_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + goodid + "</b>");
+			    $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + goodid + "</b>").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getDGSGood", { "goods": goodid }, dgsQuantityChange_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1405,14 +1395,13 @@ function extractBytesData(bytes)
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+16+8) msg = rest.slice(25);
 
-			function dgsPurchase_OnSuccess(resp, status, xhr) {
+			function dgsPurchase_OnSuccess(data, status, xhr) {
 			    $("#detailtx_loading").hide();
 			    try {
-			        var data = JSON.parse(resp);
-			        if (data.name) {
+			        if (data.hasOwnProperty('name')) {
 			            $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + data.name + " (" + goodid + ")</b> at <b>" + price / 100000000 + " NXT</b> each").show();
 			        } else {
-			            getDetailTx_OnFail(resp);
+			            getDetailTx_OnFail(data);
 			        }
 			    }
 			    catch (err) {
@@ -1424,7 +1413,7 @@ function extractBytesData(bytes)
 			    getDetailTx("getDGSGood", { "goods": goodid }, dgsPurchase_OnSuccess);
 			}
 			else {
-			    $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + goodid + "</b> at <b>" + price / 100000000 + " NXT</b> each");
+			    $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + goodid + "</b> at <b>" + price / 100000000 + " NXT</b> each").show();
 			    $("#detailtx_button").bind("click", function () {
 			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPurchase_OnSuccess);
 			        $("#detailtx_button").hide();
@@ -1796,11 +1785,16 @@ function getDetailTx(requestType, parameters, onSuccess) {
 
 function getDetailTx_OnFail(resp) {
     if (resp) {
-        var data = JSON.parse(resp);
-        if (data.errorDescription) {
-            alert(data.errorDescription);
+        try{
+            var data = JSON.parse(resp);
+            if (data.errorDescription) {
+                alert(data.errorDescription);
+            }
+            else {
+                alert("Fail to get transaction details");
+            }
         }
-        else {
+        catch (err) {
             alert("Fail to get transaction details");
         }
     }
