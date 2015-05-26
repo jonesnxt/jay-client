@@ -837,7 +837,7 @@ function clearReview()
 
 	$("#detailtx_loading").hide();
 	$("#detailtx_button").hide();
-	
+	$("#detailtx_button").unbind("click");
 }
 
 function extractBytesData(bytes)
