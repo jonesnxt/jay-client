@@ -1788,18 +1788,23 @@ function getDetailTx_OnFail(resp) {
         try{
             var data = JSON.parse(resp);
             if (data.errorDescription) {
-                alert(data.errorDescription);
+                alert(data.errorDescription + ". Please try again shortly.");
             }
             else {
-                alert("Fail to get transaction details");
+                alert("Fail to get transaction details. Please try again shortly.");
             }
         }
         catch (err) {
-            alert("Fail to get transaction details");
+            if (resp.error) {
+                alert(resp.error + ". Please try again shortly.");
+            }
+            else {
+                alert("Fail to get transaction details. Please try again shortly.");
+            }
         }
     }
     else {
-        alert("Fail to get transaction details");
+        alert("Fail to get transaction details. Please try again shortly.");
     }
 }
 
