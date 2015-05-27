@@ -269,6 +269,11 @@ function timeago(timestamp)
 	return acc;
 }
 
+function escape(str)
+{
+	return str.replace("&", "&amp").replace("<", "&lt").replace(">", "&gt").replace("\"", "&quot").replace("'", "&#x27;").replace("/", "&#x2F");
+}
+
 
 // 48 -> 57
 // 65 -> 90
@@ -1156,9 +1161,9 @@ function extractBytesData(bytes)
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
-			            var quantity = quantityQNT / Math.pow(10, data.decimals);
-			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
+			            var quantity = quantityQNT / Math.pow(10, Number(data.decimals));
+			            var price = priceNQT / Math.pow(10, 8 - Number(data.decimals));
+			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + esc(data.name) + "</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
@@ -1196,8 +1201,8 @@ function extractBytesData(bytes)
 			function getBidOrder_OnSuccess(data, status, xhr) {
 			    try {
 			        if (data.hasOwnProperty('asset')) {
-			            quantityQNT = data.quantityQNT;
-			            priceNQT = data.priceNQT;
+			            quantityQNT = Number(data.quantityQNT);
+			            priceNQT = Number(data.priceNQT);
 			            getDetailTx("getAsset", { "asset": data.asset }, getBidOrderGetAsset_OnSuccess);
 			        } else {
 			            getDetailTx_OnFail(data);
@@ -1212,9 +1217,9 @@ function extractBytesData(bytes)
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
-			            var quantity = quantityQNT / Math.pow(10, data.decimals);
-			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Cancel bid order <b>" + order + "</b> - " + "Buy <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
+			            var quantity = quantityQNT / Math.pow(10, Number(data.decimals));
+			            var price = priceNQT / Math.pow(10, 8 - Number(data.decimals));
+			            $("#tx_desc").html("Cancel bid order <b>" + order + "</b> - " + "Buy <b>" + quantity + " </b> asset <b>" + esc(data.name) + "</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
@@ -1274,8 +1279,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
-			            var price = data.priceNQT / 100000000;
-			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + data.name + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>').show();
+			            var price = Number(data.priceNQT) / 100000000;
+			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + esc(data.name) + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>').show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
@@ -1315,8 +1320,8 @@ function extractBytesData(bytes)
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
-			            var price = data.priceNQT / 100000000;
-			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
+			            var price = Number(data.priceNQT) / 100000000;
+			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + esc(data.name) + " (" + goodid + ")</b>").show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
@@ -1357,7 +1362,7 @@ function extractBytesData(bytes)
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
-			            $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
+			            $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + esc(data.name) + " (" + goodid + ")</b>").show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
@@ -1399,7 +1404,7 @@ function extractBytesData(bytes)
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
-			            $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + data.name + " (" + goodid + ")</b> at <b>" + price / 100000000 + " NXT</b> each").show();
+			            $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + esc(data.name) + " (" + goodid + ")</b> at <b>" + price / 100000000 + " NXT</b> each").show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
