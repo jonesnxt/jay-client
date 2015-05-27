@@ -14,6 +14,7 @@
 <script src="js/nxtaddress.js" type="text/javascript"></script>
 <script src="js/aes.js" type="text/javascript"></script>
 <script src="js/jaycli.js" type="text/javascript"></script>
+<script src="js/jay.js" type="text/javascript"></script>
 <script>
 
 function getUrlParameter(sParam)
@@ -40,17 +41,9 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 
 	});
-	if(getUrlParameter("popout") == "true")
-	{
-		$("#basepage").hide();
-		$("#popout").show();
-		popoutOpen();
-	}
-	else
-	{
-		$("#basepage").show();
-		$("#popout").hide();
-	}
+	$("#basepage").hide();
+	$("#popout").show();
+	popoutOpen();
 });
 
 //storeAccount(newAccount("1234"));
@@ -58,6 +51,22 @@ $('[data-toggle="popover"]').popover({trigger:"hover"});
 <style type="text/css">
 .popover {
 word-wrap: break-word;
+}
+
+body {
+margin: 50px 0px;
+padding: 0px;
+text-align: center;
+}
+
+.content {
+width: 500px;
+height: 400px;
+margin: 0px auto;
+text-align: left;
+padding: 15px;
+border: 1px solid #333;
+background-color: #eee;
 }
 </style>
 </head>
@@ -201,7 +210,7 @@ word-wrap: break-word;
 	</div>-->
 </div>
 
-<div id="popout">
+<div id="popout" class="content">
 	<ul id="popout_tabs" class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#transact" aria-controls="transact" role="tab" data-toggle="tab">Transact</a></li>
 		<li role="presentation"><a href="#token" aria-controls="token" role="tab" data-toggle="tab">Token</a></li>
@@ -229,7 +238,7 @@ word-wrap: break-word;
 					</div>
 					<div class="form-group">
 						<label for="transact_transaction" class="control-label"  data-toggle="tooltip" data-placement="right" title="TX_ format, Unsigned Tx Bytes, Nxt Address, or Public Key">Transaction</label>
-						<input id="transact_transaction" type="text" class="form-control"/>
+						<input id="transact_transaction" type="text" class="form-control" onclick="select()" autofocus/>
 					</div><br/>
 					<button id="transact_continue" type="button" class="btn btn-primary btn-block">Continue</button>
 				</form>
@@ -252,7 +261,7 @@ word-wrap: break-word;
 					</div>
 					<div class="form-group">
 						<label for="token_data" class="control-label">Website or Data</label>
-						<input id="token_data" type="text" class="form-control"/>
+                        <input id="token_data" type="text" class="form-control" onclick="select()" />
 						<span class="help-block"></span>
 					</div><br/>
 					<div id="token_button_group" class="btn-group btn-group-justified" role="group">
@@ -290,7 +299,7 @@ word-wrap: break-word;
 			</div>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="accounts">
-			<div class="container">
+			<div class="container-fluid">
 				<form id="accounts_form">
 					<div class="form-group">
 						<label for="accounts_account" class="control-label">Account</label>
@@ -332,11 +341,11 @@ word-wrap: break-word;
 			</div>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="info">
-			<div class="container">
+			<div class="container-fluid">
 				<div class="col-xs-6">
 				<dl>
   					<dt>Version</dt>
-  					<dd id="info_version">1.1</dd>
+  					<dd id="info_version">1.1.1</dd>
 
   					<dt>NRS Base</dt>
   					<dd id="info_nrs">1.4</dd>
@@ -345,7 +354,7 @@ word-wrap: break-word;
   			<div class="col-xs-6">
   				<dl>
   					<dt>Build Date</dt>
-  					<dd id="info_date">March 2015</dd>
+  					<dd id="info_date">May 2015</dd>
 
   					<dt>Created By</dt>
   					<dd id="info_created">Jones</dd>
@@ -363,7 +372,7 @@ word-wrap: break-word;
         		<h4 class="modal-title" id="modal_enter_pin_title">Enter PIN</h4>
       		</div>
       		<div class="modal-body">
-      			<div class="container">
+      			<div class="container-fluid">
       				<div class="row">
       					<input type="password" id="modal_enter_pin_input" class="text-center form-control input-sm"/>
       				</div>
@@ -437,7 +446,7 @@ word-wrap: break-word;
         		<h4 class="modal-title" id="modal_accounts_new_title">New Account</h4>
       		</div>
       		<div class="modal-body">
-      			<div class="container">
+      			<div class="container-fluid">
       				<dl style="margin-bottom:0;padding-bottom:2px;">
       					<dt>
       						Address
@@ -631,7 +640,10 @@ word-wrap: break-word;
       			</div>
       			<div class="form-group" style="margin-bottom:0;padding-bottom:0;">
       				<label for="modal_quicksend_amount" class="control-label">Amount</label>
-					<input id="modal_quicksend_amount" type="text" class="form-control input-sm"/>
+                    <div class="input-group">
+                        <input id="modal_quicksend_amount" type="text" class="form-control input-sm" />
+                        <div class="input-group-addon">NXT</div>
+                    </div>
       			</div>
       		</div>
       		<div class="modal-footer">
@@ -675,8 +687,27 @@ word-wrap: break-word;
        			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         		<h4 class="modal-title" id="modal_review_title">Transaction Review</h4>
       		</div>
-      		<div class="modal-body" style="padding-top:6px;margin-top:0;padding-bottom:0,margin-bottom:0;">
-      			<div class="row">
+      		<div class="modal-body" style="padding-top:6px;margin-top:0;padding-bottom:0;margin-bottom:0;">
+                <div class="row" id="detailtx_loading" style="display:none">
+                    <div class="col-xs-12">
+                        Getting detailed transaction details ...
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <span id="tx_desc"></span>
+                        <a id="detailtx_button" href="#" style="display:none">View details</a>
+                    </div>
+                </div>
+                  <div class="row">
+                      <div class="col-xs-12">
+                          <div style="font-style: italic; color: #737373; padding-top:34px">
+                              <b>Fee:</b> <span id="tx_fee"></span> NXT<br />
+                              <b><span id="tx_sender_title"></span>:</b> <span id="tx_sender"></span>
+                          </div>
+                      </div>
+                  </div>
+      			<div class="row" style="display:none">
 	      			<div class="col-xs-6">
 	      				<dl class="dl-horizontal" style="padding-top:0;margin-top:0;padding-bottom:0;margin-bottom:2px;">
 	      				<dt id="modal_review_key_1"></dt>
@@ -803,6 +834,11 @@ word-wrap: break-word;
 				<label class="checkbox-inline" for="modal_broadcast_testnet">
   					<input type="checkbox" id="modal_broadcast_testnet" value="true"> Use Testnet
 				</label>
+                <div class="checkbox">
+                    <label>
+                        <input id="modal_broadcast_always_send" type="checkbox"> Always show detailed transaction review
+                    </label>
+                </div>
       		</div>
       		<div class="modal-footer">
       			<button type="button" class="btn btn-sm btn-default" id="modal_broadcast_close" data-dismiss="modal">Close</button>
@@ -811,6 +847,6 @@ word-wrap: break-word;
 		</div>
   	</div>
 </div>
-
+</div>
 </body>
 </html>

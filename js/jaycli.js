@@ -413,6 +413,9 @@ function popoutOpen()
 		localStorage["node"] = DEFAULT_NODE;
 		localStorage["isTestnet"] = false;
 	}
+	if (!localStorage.hasOwnProperty("isAlwaysSend")) {
+	    localStorage["isAlwaysSend"] = true;
+	}
 	// ok lets deal with any popup setup thats needed.
 	if(!localStorage["accounts"] || JSON.parse(localStorage["accounts"]).length == 0)
 	{
@@ -507,10 +510,14 @@ function transactionBroadcasted(resp, state)
 	}
 }
 
-function setBroadcastNode(node, isTestnet)
+function setBroadcastNode(node, isTestnet, isAlwaysSend)
 {
-	localStorage["node"] = node;
+    if (node) {
+        localStorage["node"] = node;
+    }
 	localStorage["isTestnet"] = (isTestnet === true);
+	Jay.isTestnet = (isTestnet === true);
+	localStorage["isAlwaysSend"] = (isAlwaysSend === true);
 }
 
 function getBroadcastNode()
@@ -823,6 +830,14 @@ function clearReview()
 	setReview(5, "", "");
 	setReview(6, "", "");
 
+	$("#tx_desc").html("");
+	$("#tx_sender_title").text("");
+	$("#tx_fee").text("");
+	$("#tx_sender").text("");
+
+	$("#detailtx_loading").hide();
+	$("#detailtx_button").hide();
+	$("#detailtx_button").unbind("click");
 }
 
 function extractBytesData(bytes)
@@ -853,6 +868,9 @@ function extractBytesData(bytes)
 	{
 		if(subtype == 0)
 		{
+		    $("#tx_desc").html("Send <b>" + amount / 100000000 + " NXT</b> to <b>" + recipient + "</b>");
+		    $("#tx_sender_title").text("Sender");
+		    
 			typeName = "Ordinary Payment";
 			setReview(1, "Type", typeName);
 			setReview(2, "Sender", sender);
@@ -866,6 +884,9 @@ function extractBytesData(bytes)
 	{
 		if(subtype == 0)
 		{
+		    $("#tx_desc").html("Send message to <b>" + recipient + "</b>");
+		    $("#tx_sender_title").text("Sender");
+
 			typeName = "Arbitrary Message";
 			setReview(1, "Type", typeName);
 			setReview(2, "Sender", sender);
@@ -885,6 +906,9 @@ function extractBytesData(bytes)
 			$("#modal_review_description").removeAttr("disabled");
 			$("#modal_review_description").attr("data-content", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
+
+			$("#tx_desc").html("Create/update alias <b>" + alias + "</b>");
+			$("#tx_sender_title").text("Registrar");
 		}
 		else if(subtype == 2)
 		{
@@ -910,6 +934,9 @@ function extractBytesData(bytes)
 			$("#modal_review_description").removeAttr("disabled");
 			$("#modal_review_description").attr("data-content", data);
 			if(rest.length > 2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1]))) msg = rest.slice(2+rest[1]+bytesWord(rest.slice(2+rest[1], 4+rest[1])));
+
+			$("#tx_desc").html("Set <b>" + alias + "</b> as your account's name");
+			$("#tx_sender_title").text("Account");
 		}
 		else if(subtype == 6) 
 		{
@@ -917,13 +944,18 @@ function extractBytesData(bytes)
 			setReview(1, "Type", typeName);
 			setReview(2, "Seller", sender);
 			var alias = converters.byteArrayToString(rest.slice(2, rest[1]+2));
-			if(recipient == "NXT-2222-2222-2222-22222") setReview(3, "Buyer", "Anyone");
-			else setReview(3, "Buyer", recipient);
+			var target = "";
+			if (recipient == "NXT-MRCC-2YLS-8M54-3CMAJ") { setReview(3, "Buyer", "Anyone"); target = "anyone"; }
+			else { setReview(3, "Buyer", recipient); target = recipient; }
 			setReview(4, "Alias Name", alias);
-			var price = byteArrayToBigInteger(rest.slice(2+rest[1], 10+rest[1])).toString();
+			var price = byteArrayToBigInteger(rest.slice(2 + rest[1], 10 + rest[1])).toString();
+			price = price/100000000;
 			setReview(5, "Sell Price", price);
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 10+rest[1]) msg = rest.slice(10+rest[1]);
+
+			$("#tx_desc").html("Sell alias <b>" + alias + "</b> to <b>" + target + "</b> for <b>" + price + " NXT</b>");
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 7) 
 		{
@@ -935,7 +967,10 @@ function extractBytesData(bytes)
 			setReview(4, "Alias", alias);
 			setReview(5, "Buy Price", amount/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
-			if(rest.length > 2+rest[1]) msg = rest.slice(2+rest[1])
+			if(rest.length > 2+rest[1]) msg = rest.slice(2+rest[1]);
+
+			$("#tx_desc").html("Buy alias <b>" + alias + "</b> from <b>" + recipient + "</b> for <b>" + amount/100000000 + " NXT</b>");
+			$("#tx_sender_title").text("Buyer");
 		}
 	}
 	else if(type == 2)
@@ -952,9 +987,14 @@ function extractBytesData(bytes)
 			$("#modal_review_description").removeAttr("disabled");
 			$("#modal_review_description").attr("data-content", data);
 			var units = byteArrayToBigInteger(rest.slice(newpos, newpos+8));
+			var decimals = rest[newpos+8];
+			units = units/Math.pow(10, decimals);
 			setReview(4, "Units", units);
-			setReview(5, "Decimals", rest[newpos+8]);
+			setReview(5, "Decimals", decimals);
 			setReview(6, "Fee", fee/100000000 + " nxt");
+
+			$("#tx_desc").html("Issue <b>" + units + " units</b> asset <b>" + name + "</b>, with decimal <b>" + decimals + "</b>");
+			$("#tx_sender_title").text("Issuer");
 		}
 		else if(subtype == 1) 
 		{
@@ -968,6 +1008,35 @@ function extractBytesData(bytes)
 			setReview(5, "Amount", amount + " QNT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 17) msg = rest.slice(17);
+
+			function assetTransfer_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('decimals')) {
+			            amount = amount/Math.pow(10, data.decimals);
+			            $("#tx_desc").html("Transfer <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> to <b>" + recipient + "</b>").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Transfer <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> to <b>" + recipient + "</b>").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAsset", { "asset": assetId }, assetTransfer_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Sender");
 		}
 		else if(subtype == 2) 
 		{
@@ -982,6 +1051,36 @@ function extractBytesData(bytes)
 			setReview(5, "Price", price + " NQT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
+
+			function askOrderPlacement_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('decimals')) {
+			            amount = amount / Math.pow(10, data.decimals);
+			            price = price / Math.pow(10, 8 - data.decimals);
+			            $("#tx_desc").html("Sell <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAsset", { "asset": assetId }, askOrderPlacement_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Sell <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price +" NQT </b> each").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAsset", { "asset": assetId }, askOrderPlacement_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Trader");
 		}
 		else if(subtype == 3) 
 		{
@@ -996,6 +1095,36 @@ function extractBytesData(bytes)
 			setReview(5, "Price", price + " NQT");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 25) msg = rest.slice(25);
+
+			function bidOrderPlacement_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('decimals')) {
+			            amount = amount / Math.pow(10, data.decimals);
+			            price = price / Math.pow(10, 8 - data.decimals);
+			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Buy <b>" + amount + " QNT</b> asset <b>" + assetId + "</b> at <b>" + price + " NQT </b> each").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAsset", { "asset": assetId }, bidOrderPlacement_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Trader");
 		}
 		else if(subtype == 4) 
 		{
@@ -1006,6 +1135,52 @@ function extractBytesData(bytes)
 			setReview(3, "Order Id", order);
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 9) msg = rest.slice(9);
+
+			var quantityQNT, priceNQT;
+			function getAskOrder_OnSuccess(data, status, xhr) {
+			    try {
+			        if (data.hasOwnProperty('asset')) {
+			            quantityQNT = data.quantityQNT;
+			            priceNQT = data.priceNQT;
+			            getDetailTx("getAsset", { "asset": data.asset }, getAskOrderGetAsset_OnSuccess);
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			function getAskOrderGetAsset_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('decimals')) {
+			            var quantity = quantityQNT / Math.pow(10, data.decimals);
+			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
+			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Cancel ask order <b>" + order + "</b>").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getAskOrder", { "order": order }, getAskOrder_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Trader");
 		}
 		else if(subtype == 5)
 		{
@@ -1016,6 +1191,52 @@ function extractBytesData(bytes)
 			setReview(3, "Order Id", order);
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 9) msg = rest.slice(9);
+
+			var quantityQNT, priceNQT;
+			function getBidOrder_OnSuccess(data, status, xhr) {
+			    try {
+			        if (data.hasOwnProperty('asset')) {
+			            quantityQNT = data.quantityQNT;
+			            priceNQT = data.priceNQT;
+			            getDetailTx("getAsset", { "asset": data.asset }, getBidOrderGetAsset_OnSuccess);
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			function getBidOrderGetAsset_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('decimals')) {
+			            var quantity = quantityQNT / Math.pow(10, data.decimals);
+			            var price = priceNQT / Math.pow(10, 8 - data.decimals);
+			            $("#tx_desc").html("Cancel bid order <b>" + order + "</b> - " + "Buy <b>" + quantity + " </b> asset <b>" + data.name + "</b> at <b>" + price + " NXT </b> each").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getBidOrder", { "order": order }, getBidOrder_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Cancel bid order <b>" + order + "</b>").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getBidOrder", { "order": order }, getBidOrder_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Trader");
 		}
 	}
 	else if(type == 3)
@@ -1049,6 +1270,34 @@ function extractBytesData(bytes)
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 9) msg = rest.slice(9);
 
+			function goodDelisting_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('name')) {
+			            var price = data.priceNQT / 100000000;
+			            $("#tx_desc").html("Delete marketplace product <b>" + order + "</b> : <br/><br/>" + '<table class="table table-striped"><tbody><tr><th style="width:85px"><strong>Product</strong>:</th><td>' + data.name + '</td></tr><tr><th><strong>Price</strong>:</th><td>' + price + ' NXT</td></tr><tr><th><strong>Quantity</strong>:</th><td>' + data.quantity + '</td></tr></tbody></table>').show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Delete marketplace product <b>" + order + "</b>").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": order }, goodDelisting_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 2) 
 		{
@@ -1058,9 +1307,38 @@ function extractBytesData(bytes)
 			var goodid = byteArrayToBigInteger(rest.slice(1, 1+8)).toString();
 			setReview(3, "Item Id", goodid);
 			var newprice = byteArrayToBigInteger(rest.slice(1+8, 1+8+8)).toString();
-			setReview(4, "New Price", nowprice/100000000 + " nxt");
+			setReview(4, "New Price", newprice/100000000 + " nxt");
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+8) msg = rest.slice(17);
+
+			function dgsPriceChange_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('name')) {
+			            var price = data.priceNQT / 100000000;
+			            $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Change price to <b>" + newprice / 100000000 + " NXT</b> for marketplace product <b>" + goodid + "</b>").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPriceChange_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 3) 
 		{
@@ -1074,6 +1352,34 @@ function extractBytesData(bytes)
 			else setReview(4, "Increase By", chg);
 			setReview(5, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+8+4) msg = rest.slice(13);
+
+			function dgsQuantityChange_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('name')) {
+			            $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + data.name + " (" + goodid + ")</b>").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": goodid }, dgsQuantityChange_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Change quantity to <b>" + chg + "</b> for marketplace product <b>" + goodid + "</b>").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": goodid }, dgsQuantityChange_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 4)
 		{
@@ -1088,6 +1394,34 @@ function extractBytesData(bytes)
 			setReview(5, "Price", price/100000000 + " nxt");
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+16+8) msg = rest.slice(25);
+
+			function dgsPurchase_OnSuccess(data, status, xhr) {
+			    $("#detailtx_loading").hide();
+			    try {
+			        if (data.hasOwnProperty('name')) {
+			            $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + data.name + " (" + goodid + ")</b> at <b>" + price / 100000000 + " NXT</b> each").show();
+			        } else {
+			            getDetailTx_OnFail(data);
+			        }
+			    }
+			    catch (err) {
+			        getDetailTx_OnFail();
+			    }
+			}
+
+			if (isGetTxDetails()) {
+			    getDetailTx("getDGSGood", { "goods": goodid }, dgsPurchase_OnSuccess);
+			}
+			else {
+			    $("#tx_desc").html("Purchase <b>" + qnt + "</b> product <b>" + goodid + "</b> at <b>" + price / 100000000 + " NXT</b> each").show();
+			    $("#detailtx_button").bind("click", function () {
+			        getDetailTx("getDGSGood", { "goods": goodid }, dgsPurchase_OnSuccess);
+			        $("#detailtx_button").hide();
+			        $("#detailtx_loading").show();
+			        $("#tx_desc").hide();
+			    }).show();
+			}
+			$("#tx_sender_title").text("Seller");
 		}
 		else if(subtype == 5)
 		{
@@ -1137,6 +1471,9 @@ function extractBytesData(bytes)
 			setReview(3, "Length", lease + " blocks");
 			setReview(4, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 3) msg = rest.slice(3);
+
+			$("#tx_desc").html("Lease balance to <b>" + recipient + "</b> for <b>" + lease + " blocks</b>");
+			$("#tx_sender_title").text("Sender");
 		} 
 	}
 	else if(type == 5)
@@ -1204,6 +1541,9 @@ function extractBytesData(bytes)
 		}
 	}
 
+	$("#tx_fee").text(fee / 100000000);
+	$("#tx_sender").text(sender);
+
 	var message = getModifierBit(flags, 0);
 	var publicKey = getModifierBit(flags, 2);
 	if(message && msg.length)
@@ -1270,7 +1610,7 @@ function quicksendHandler(pin)
 		{
 			$("#modal_quick_sure_recipient").text(getAccountIdFromPublicKey(recipient, true) + " (with Public Key)");
 		}
-		$("#modal_quick_sure_amount").text(amount + " nxt");
+		$("#modal_quick_sure_amount").text(amount + " NXT");
 		$("#modal_quick_sure").modal("show");
 
 		// now we open the "are you sure" modal...tomorrow..
@@ -1429,6 +1769,51 @@ function findAccount(address)
 		}
 	}
 	return false;
+}
+
+function getDetailTx(requestType, parameters, onSuccess) {
+    var requestMethod;
+    if (localStorage["isTestnet"] == "true") {
+        requestMethod = Jay.requestMethods.single;
+        Jay.singleNode = Jay.commonTestnetNodes[0];
+    }
+    else {
+        requestMethod = Jay.requestMethods.validate;
+    }
+    Jay.request(requestType, parameters, onSuccess, getDetailTx_OnFail, requestMethod);
+}
+
+function getDetailTx_OnFail(resp) {
+    if (resp) {
+        try{
+            var data = JSON.parse(resp);
+            if (data.errorDescription) {
+                alert(data.errorDescription + ". Please try again shortly.");
+            }
+            else {
+                alert("Fail to get transaction details. Please try again shortly.");
+            }
+        }
+        catch (err) {
+            if (resp.error) {
+                alert(resp.error + ". Please try again shortly.");
+            }
+            else {
+                alert("Fail to get transaction details. Please try again shortly.");
+            }
+        }
+    }
+    else {
+        alert("Fail to get transaction details. Please try again shortly.");
+    }
+}
+
+function isGetTxDetails() {
+    if (localStorage["isAlwaysSend"] == "true") {
+        $("#detailtx_loading").show();
+        return true;
+    }
+    else return false;
 }
 
 $("document").ready(function() {
@@ -1608,7 +1993,7 @@ $("document").ready(function() {
 	});
 
 	$("#modal_quick_sure_send").click(function() {
-		broadcastTransaction(getBroadCastNode(), $("#modal_quick_sure").data("tx"));
+	    broadcastTransaction(getBroadcastNode(), $("#modal_quick_sure").data("tx"));
 	})
 
 	$("#modal_verify_token").on("show.bs.modal", function() {
@@ -1621,18 +2006,52 @@ $("document").ready(function() {
 
 	$("#modal_broadcast").on("show.bs.modal", function() {
 		var old = localStorage["node"];
-		if(localStorage["isTestnet"] == "true") old += " (testnet)";
-		else old += " (mainnet)";
+		if (localStorage["isTestnet"] == "true") {
+		    old += " (testnet)";
+		    $("#modal_broadcast_testnet").prop('checked', true)
+		}
+		else {
+		    old += " (mainnet)";
+		    $("#modal_broadcast_testnet").prop('checked', false);
+		}
+		if (localStorage["isAlwaysSend"] == "true") $("#modal_broadcast_always_send").prop('checked', true);
+		else $("#modal_broadcast_always_send").prop('checked', false);
 		$("#modal_broadcast_old").text(old);
-		$("#modal_broadcast_node").text("");
-		$("#modal_broadcast_testnet").removeAttr("checked");
+		$("#modal_broadcast_node").val("");
 	})
 
 	$("#modal_broadcast_save").click(function() {
 		var node = $("#modal_broadcast_node").val();
 		var isTestnet = $("#modal_broadcast_testnet").is(":checked");
-		setBroadcastNode(node, isTestnet);
+		var isAlwaysSend = $("#modal_broadcast_always_send").is(":checked");
+		setBroadcastNode(node, isTestnet, isAlwaysSend);
 		$("#modal_broadcast").modal("hide");
 	})
 
+	$("#popout_tabs a").click(function (e) {
+	    var tab = e.target.attributes.href.value;
+	    var focus;
+	    if (tab == "#transact") focus = "#transact_transaction";
+	    else if (tab == "#token") focus = "#token_data";
+
+	    if (focus) {
+	        setTimeout(function () { $(focus).focus(); }, 10);
+	    }
+	})
+
+	$(".modal").on("shown.bs.modal", function (e) {
+	    setTimeout(function () { $("#" + e.target.id).find('input:enabled:not([readonly])').first().focus(); }, 10);
+	})
+
+	$("#transact_transaction").keypress(function (e) {
+	    if (e.which == "13") {
+	        e.preventDefault();
+	        if ($(this).val()) {
+	            $(this).submit();
+	        }
+	    }
+	});
+
+	Jay.nodeScan(function () { });
+	if (localStorage["isTestnet"] == "true") Jay.isTestnet = true;
 }) 
