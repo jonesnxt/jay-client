@@ -269,7 +269,7 @@ function timeago(timestamp)
 	return acc;
 }
 
-function escape(str)
+function esc(str)
 {
 	return str.replace("&", "&amp").replace("<", "&lt").replace(">", "&gt").replace("\"", "&quot").replace("'", "&#x27;").replace("/", "&#x2F");
 }
