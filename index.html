@@ -37,13 +37,22 @@ $('[data-toggle="tooltip"]').tooltip()
 $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 	$(".buttonc").click( function() {
-		window.open("index.html?popout=true", "_blank", "width=400, height=320")
+		window.open("index.html?popout=true", "_blank", "width=502, height=402")
 
 
 	});
 	$("#basepage").hide();
 	$("#popout").show();
 	popoutOpen();
+	if(getUrlParameter("popout") != "true") 
+	{
+		$(".nopop").show();
+	}
+	else
+	{
+		$(".content").css("margin", "0").css("padding", "0").css("border", "none");
+		$("body").css("margin", "0");
+	}
 });
 
 //storeAccount(newAccount("1234"));
@@ -72,6 +81,12 @@ background-color: #eee;
 </head>
 
 <body>
+	<div class="nopop" style="display: none;">
+		<button style="position: relative; bottom: 20px;" class="buttonc btn btn-primary">Open in Popout</button>
+
+		<br/><br/>
+
+	</div>
 <div class="container" id="basepage">
 	<div class="row">
 		<div class="col-md-12">
@@ -79,7 +94,7 @@ background-color: #eee;
 		</div>
 	</div>
 	<div class="well">
-		<button class="buttonc btn btn-primary btn-block">Open Jay Client in Popout</button>
+		<button class="buttonc btn btn-primary">Open Jay Client in Popout</button>
 		<span class="help-block">Opens a smaller popout window to more easily use. (recommended)</span>
 	</div>
 	<!--<div class="row">

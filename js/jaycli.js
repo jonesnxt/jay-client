@@ -1015,6 +1015,8 @@ function extractBytesData(bytes)
 			if(rest.length > 17) msg = rest.slice(17);
 
 			function assetTransfer_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
@@ -1058,6 +1060,8 @@ function extractBytesData(bytes)
 			if(rest.length > 25) msg = rest.slice(25);
 
 			function askOrderPlacement_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
@@ -1102,12 +1106,13 @@ function extractBytesData(bytes)
 			if(rest.length > 25) msg = rest.slice(25);
 
 			function bidOrderPlacement_OnSuccess(data, status, xhr) {
+				data = JSON.parse(data);
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
-			            amount = amount / Math.pow(10, data.decimals);
-			            price = price / Math.pow(10, 8 - data.decimals);
-			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + data.name + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
+			            amount = amount / Math.pow(10, Number(data.decimals));
+			            price = price / Math.pow(10, 8 - Number(data.decimals));
+			            $("#tx_desc").html("Buy <b>" + amount + " </b> asset <b>" + esc(data.name) + " (" + assetId + ")</b> at <b>" + price + " NXT </b> each").show();
 			        } else {
 			            getDetailTx_OnFail(data);
 			        }
@@ -1143,7 +1148,10 @@ function extractBytesData(bytes)
 
 			var quantityQNT, priceNQT;
 			function getAskOrder_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    try {
+			    	console.log("ahahhahah");
 			        if (data.hasOwnProperty('asset')) {
 			            quantityQNT = data.quantityQNT;
 			            priceNQT = data.priceNQT;
@@ -1158,9 +1166,12 @@ function extractBytesData(bytes)
 			}
 
 			function getAskOrderGetAsset_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
+			        	console.log("aaahhhH");
 			            var quantity = quantityQNT / Math.pow(10, Number(data.decimals));
 			            var price = priceNQT / Math.pow(10, 8 - Number(data.decimals));
 			            $("#tx_desc").html("Cancel ask order <b>" + order + "</b> - " + "Sell <b>" + quantity + " </b> asset <b>" + esc(data.name) + "</b> at <b>" + price + " NXT </b> each").show();
@@ -1199,6 +1210,8 @@ function extractBytesData(bytes)
 
 			var quantityQNT, priceNQT;
 			function getBidOrder_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    try {
 			        if (data.hasOwnProperty('asset')) {
 			            quantityQNT = Number(data.quantityQNT);
@@ -1214,6 +1227,8 @@ function extractBytesData(bytes)
 			}
 
 			function getBidOrderGetAsset_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('decimals')) {
@@ -1276,6 +1291,8 @@ function extractBytesData(bytes)
 			if(rest.length > 9) msg = rest.slice(9);
 
 			function goodDelisting_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
@@ -1317,6 +1334,8 @@ function extractBytesData(bytes)
 			if(rest.length > 1+8+8) msg = rest.slice(17);
 
 			function dgsPriceChange_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
@@ -1359,6 +1378,8 @@ function extractBytesData(bytes)
 			if(rest.length > 1+8+4) msg = rest.slice(13);
 
 			function dgsQuantityChange_OnSuccess(data, status, xhr) {
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
@@ -1400,7 +1421,9 @@ function extractBytesData(bytes)
 			setReview(6, "Fee", fee/100000000 + " nxt");
 			if(rest.length > 1+16+8) msg = rest.slice(25);
 
-			function dgsPurchase_OnSuccess(data, status, xhr) {
+			function dgsPurchase_OnSuccess(data, status, xhr) { 
+								data = JSON.parse(data);
+
 			    $("#detailtx_loading").hide();
 			    try {
 			        if (data.hasOwnProperty('name')) {
@@ -1783,12 +1806,14 @@ function getDetailTx(requestType, parameters, onSuccess) {
         Jay.singleNode = Jay.commonTestnetNodes[0];
     }
     else {
-        requestMethod = Jay.requestMethods.validate;
+    	Jay.setNode("jnxt.org");
+        requestMethod = Jay.requestMethods.single;
     }
     Jay.request(requestType, parameters, onSuccess, getDetailTx_OnFail, requestMethod);
 }
 
 function getDetailTx_OnFail(resp) {
+	console.log(resp);
     if (resp) {
         try{
             var data = JSON.parse(resp);
