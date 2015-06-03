@@ -419,7 +419,7 @@ function popoutOpen()
 		localStorage["isTestnet"] = false;
 	}
 	if (!localStorage.hasOwnProperty("isAlwaysSend")) {
-	    localStorage["isAlwaysSend"] = true;
+	    localStorage["isAlwaysSend"] = false;
 	}
 	// ok lets deal with any popup setup thats needed.
 	if(!localStorage["accounts"] || JSON.parse(localStorage["accounts"]).length == 0)
@@ -1806,8 +1806,7 @@ function getDetailTx(requestType, parameters, onSuccess) {
         Jay.singleNode = Jay.commonTestnetNodes[0];
     }
     else {
-    	Jay.setNode("jnxt.org");
-        requestMethod = Jay.requestMethods.single;
+        requestMethod = Jay.requestMethods.fastest;
     }
     Jay.request(requestType, parameters, onSuccess, getDetailTx_OnFail, requestMethod);
 }

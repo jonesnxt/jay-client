@@ -59,7 +59,7 @@
 
 var Jay = {};
 
-	Jay.commonNodes = ["jnxt.org","node2.krusherpt.com","217.17.88.5","162.243.122.251","91.235.72.49"];
+	Jay.commonNodes = ["jnxt.org","node2.krusherpt.com","217.17.88.5","162.243.122.251","91.235.72.49", "69.163.40.132"];
 	Jay.commonTestnetNodes = ["localhost"];
 
 	Jay.msTimeout = 1000;
