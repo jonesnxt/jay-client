@@ -1155,7 +1155,6 @@ function extractBytesData(bytes)
 								data = JSON.parse(data);
 
 			    try {
-			    	console.log("ahahhahah");
 			        if (data.hasOwnProperty('asset')) {
 			            quantityQNT = data.quantityQNT;
 			            priceNQT = data.priceNQT;
@@ -2014,10 +2013,12 @@ $("document").ready(function() {
 
 	$("#modal_accounts_new_add").click(function() {
 		storeAccount(pendingAccount);
-		pendingAccount = undefined;
 		loadAccounts();
 		$("#modal_accounts_new").modal("hide");
-		infoModal("Account Successfully Added");
+		$("#modal_added_account_link").attr("href", "http://jnxt.org/key?pub="+pendingAccount.publicKey+"&nxt="+pendingAccount.accountRS);
+		pendingAccount = undefined;
+
+		$("#modal_added_account").modal("show");
 	});
 	$("#modal_accounts_new_cancel").click(function() {
 		pendingAccount = undefined;

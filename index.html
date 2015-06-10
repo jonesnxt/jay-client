@@ -37,7 +37,8 @@ $('[data-toggle="tooltip"]').tooltip()
 $('[data-toggle="popover"]').popover({trigger:"hover"});
 
 	$(".buttonc").click( function() {
-		window.open("index.html?popout=true", "_blank", "width=502, height=402")
+		var filename = window.location.pathname.substring(window.location.pathname.lastIndexOf('/')+1);
+		window.open(filename+"?popout=true", "_blank", "width=502, height=402")
 
 
 	});
@@ -92,7 +93,7 @@ background-color: #eee;
 			<div class="page-header"><h1>Jay Client</h1></div>
 		</div>
 	</div>
-	<div class="well">
+	<div class="well"> x
 		<button class="buttonc btn btn-primary">Open Jay Client in Popout</button>
 		<span class="help-block">Opens a smaller popout window to more easily use. (recommended)</span>
 	</div>
@@ -525,6 +526,23 @@ background-color: #eee;
       		</div>
       		<div class="modal-footer">
         		<button type="button" class="btn btn-default" id="modal_basic_info_close" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+  	</div>
+</div>
+
+<div class="modal fade" id="modal_added_account" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+      		<div class="modal-header">
+       			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        		<h4 class="modal-title" id="modal_added_account_title">Account Added</h4>
+      		</div>
+      		<div class="modal-body">
+      			<a id="modal_added_account_link" target="_blank">Announce Public Key for New Account</a>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" id="modal_added_account_close" data-dismiss="modal">Close</button>
 			</div>
 		</div>
   	</div>
