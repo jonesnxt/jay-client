@@ -78,6 +78,10 @@ padding: 15px;
 border: 1px solid #333;
 background-color: #eee;
 }
+
+.modal-body {
+    text-align: left;
+}
 </style>
 </head>
 
@@ -356,10 +360,10 @@ background-color: #eee;
 				<div class="col-xs-6">
 				<dl>
   					<dt>Version</dt>
-  					<dd id="info_version">1.2.1</dd>
+  					<dd id="info_version">1.2.2</dd>
 
   					<dt>NRS Base</dt>
-  					<dd id="info_nrs">1.4</dd>
+  					<dd id="info_nrs">1.5</dd>
   				</dl>
   			</div>
   			<div class="col-xs-6">
@@ -736,7 +740,7 @@ background-color: #eee;
                         <a id="detailtx_button" href="#" style="display:none">View details</a>
                     </div>
                 </div>
-                  <div class="row">
+                  <div class="row" id="tx_fees_detail">
                       <div class="col-xs-12">
                           <div style="font-style: italic; color: #737373; padding-top:34px">
                               <b>Fee:</b> <span id="tx_fee"></span> NXT<br />
