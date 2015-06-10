@@ -1,4 +1,7 @@
 var DEFAULT_NODE = "jnxt.org";
+var MULTIGATEWAY_V1 = [
+    { "coin": "BTC", "recipient": "NXT-3TKA-UH62-478B-DQU6K", "sender": ["8593269027165738667", "2986384496629142530", "2406158154854548637", "12736719038753962716"] }
+];
 
 var _hash = {
 		init: SHA256_init,
@@ -843,6 +846,7 @@ function clearReview()
 	$("#detailtx_loading").hide();
 	$("#detailtx_button").hide();
 	$("#detailtx_button").unbind("click");
+	$('#modal_review_continue').prop('disabled', false);
 }
 
 function extractBytesData(bytes)
@@ -1568,9 +1572,72 @@ function extractBytesData(bytes)
 			typeName = "Delete Currency";
 		}
 	}
+	else if (type == 100) {
+	    if (subtype == 0) {
+	        $('#modal_review_continue').prop('disabled', true);
+	        var transaction = byteArrayToBigInteger(rest.slice(1, 1 + 8)).toString();
 
-	$("#tx_fee").text(fee / 100000000);
-	$("#tx_sender").text(sender);
+	        function getMgwTransaction_OnSuccess(data, status, xhr) {
+	            var address = converters.byteArrayToString(rest.slice(1 + 8));
+	            var isVerify = false;
+	            data = JSON.parse(data);
+	            try {
+	                var strHex = data.attachment.message;
+	                strHex = strHex.toString().substring(64);
+	                var strMsg = converters.hexStringToString(strHex);
+	                var jsonMsg = $.parseJSON(strMsg);
+
+	                var result = $.grep(MULTIGATEWAY_V1, function (_mgwCoin) { return _mgwCoin.coin == jsonMsg.coin });
+
+	                if (result.length > 0) {
+	                    if (data.recipientRS == result[0].recipient) {
+	                        if ($.inArray(data.sender, result[0].sender) > -1) {
+	                            if (jsonMsg.address == address) {
+	                                isVerify = true;
+	                            }
+	                        }
+	                    }
+	                }
+	                $("#detailtx_loading").hide();
+
+	                if (isVerify) {
+	                    var address = new NxtAddress();
+
+	                    if (address.set(jsonMsg.NXTaddr)) {
+	                        $("#tx_desc").html("Deposit address is <b>verified</b>.<br/><br/>Sending <b>" + esc(jsonMsg.coin) + "</b> to <b>" + esc(jsonMsg.address) + "</b> will be credited to account <b>" + address.toString() + "</b>").show();
+
+	                    }
+	                } else {
+	                    getDetailTx_OnFail();
+	                }
+	            }
+	            catch (err) {
+	                getDetailTx_OnFail();
+	            }
+	        }
+
+	        if (isGetTxDetails()) {
+	            getDetailTx("getTransaction", { "transaction": transaction }, getMgwTransaction_OnSuccess);
+	        }
+	        else {
+	            $("#tx_desc").html("Your multigateway deposit address transaction id <b>" + transaction + "</b>").show();
+	            $("#detailtx_button").bind("click", function () {
+	                getDetailTx("getTransaction", { "transaction": transaction }, getMgwTransaction_OnSuccess);
+	                $("#detailtx_button").hide();
+	                $("#detailtx_loading").show();
+	                $("#tx_desc").hide();
+	            }).show();
+	        }
+	        $("#tx_sender_title").text("Account");
+	    }
+	}
+	if (fee == 0) {
+	    $("#tx_fees_detail").hide();
+	} else {
+	    $("#tx_fees_detail").show();
+	    $("#tx_fee").text(fee / 100000000);
+	    $("#tx_sender").text(sender);
+	}
 
 	var message = getModifierBit(flags, 0);
 	var publicKey = getModifierBit(flags, 2);
