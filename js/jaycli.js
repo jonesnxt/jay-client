@@ -1211,6 +1211,7 @@ function extractBytesData(bytes)
 		$("#modal_review_message").removeAttr("disabled");
 		var len = bytesWord([msg[1],msg[2]]);
 		var str = converters.byteArrayToString(msg.slice(5,5+len));
+		setReview(this.reviewData.length, "Message", str);
 		$("#modal_review_message").attr("data-content", str);
 		msg = msg.slice(3+len);
 	}
