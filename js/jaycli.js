@@ -740,7 +740,7 @@ function startTransact()
 			}
 			else
 			{
-				startHex(account, tx);
+				startHex(tx);
 			}
 		}
 		else
@@ -825,8 +825,18 @@ function startHex(hex)
 	// now we have hex bytes, lets deal with them...
 	var bytes = converters.hexStringToByteArray(hex);
 
-	// get important things from this, verify it?..
-	extractBytesData(bytes);
+	// check to see if the hex is signed or not...
+	var sig = converters.byteArrayToSignedInt32(bytes.slice(96, 100));
+	if(sig == 0)
+	{
+		// unsigned bytes, normal extract
+		extractBytesData(bytes);
+	}	
+	else
+	{
+		// already signed, no need to do it already...
+		extractBytesData(bytes, true);
+	}
 }
 
 function clearReview()
@@ -849,7 +859,7 @@ function clearReview()
 	$('#modal_review_continue').prop('disabled', false);
 }
 
-function extractBytesData(bytes)
+function extractBytesData(bytes, signed)
 {
 	// lets think here.
 	// first we take out the version and subversion, and then think from there
@@ -869,6 +879,7 @@ function extractBytesData(bytes)
 	var recipient = r.toString();
 	var amount = byteArrayToBigInteger(bytes.slice(48, 48+8));
 	var fee = byteArrayToBigInteger(bytes.slice(56, 56+8));
+	console.log(bytes);
 	var flags = converters.byteArrayToSignedInt32(bytes.slice(160, 160+4));
 	rest = [];
 	if(bytes.length > 176) rest = bytes.slice(176);
@@ -930,7 +941,7 @@ function extractBytesData(bytes)
 		else if(subtype == 4)
 		{
 			typeName = "Hub Announcement"; //  what even is this?
-		}
+		} 
 		else if(subtype == 5) 
 		{
 			typeName = "Account Info";
@@ -1659,6 +1670,20 @@ function extractBytesData(bytes)
 	else $("#modal_review_public_key").attr("disabled","true");
 
 	// appendages... ugh... and no icons, how will I do this..
+	if(signed)
+	{
+		$("#modal_review_title").text("Transaction Review (signed)");
+		$("#modal_review_continue").text("Broadcast");
+		$("#modal_review").data("signed", "true");
+
+	}
+	else
+	{
+		$("#modal_review_title").text("Transaction Review");
+		$("#modal_review_continue").text("Continue");
+		$("#modal_review").data("signed", "false");
+	}
+
 
 	$("#modal_review").modal("show");
 }
@@ -2080,9 +2105,16 @@ $("document").ready(function() {
 	$("#modal_review_continue").click(function() {
 		var bytes = $("#modal_review").data("bytes");
 		$("#modal_review").modal("hide");
-		$("#modal_enter_pin").data("source", "review");
-		$("#modal_enter_pin").data("bytes", bytes);
-		$("#modal_enter_pin").modal("show");
+		if($("#modal_review").data("signed") == "true")
+		{
+			broadcastTransaction(getBroadcastNode(), bytes);
+		}
+		else
+		{
+			$("#modal_enter_pin").data("source", "review");
+			$("#modal_enter_pin").data("bytes", bytes);
+			$("#modal_enter_pin").modal("show");
+		}
 	})
 
 	$("#modal_signed_broadcast").click(function() {
